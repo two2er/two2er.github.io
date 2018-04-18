@@ -4,7 +4,7 @@ for _, _, files in os.walk('./_posts'):
     data = ''
     with open('./_posts/'+file, 'r') as f:
       for line in f:
-        data += line.replace('\n', '  \n')
+        data += line[:-1].strip()+'  \n'
       f.close()
     with open('./_posts/'+file, 'w') as f:
       f.write(data)
