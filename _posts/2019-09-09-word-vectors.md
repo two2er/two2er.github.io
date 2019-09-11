@@ -65,7 +65,7 @@ To generate more capable word vectors than one-hot vector, in most case we rely 
 
 The co-occurrence matrix is as following:
 
-![co-occurrence matrix](C:\Users\dtcf\Desktop\workspace\two2er.github.io\img\co_occurrence_matrix.jpg)
+![co-occurrence matrix](https://two2er.github.io/img/co_occurrence_matrix.jpg)
 
 As we can see, the shape of the co-occurrence matrix is $\|V\|\times\|V\|$, each word's vector is $\|V\|\times 1$, same as the one-hot vector. This kind of vectors can capture some extend of word similarity. However, it is still a little naïve , and the dimension needs further to be reduced.
 
