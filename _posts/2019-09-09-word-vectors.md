@@ -140,7 +140,7 @@ $$P(u_o|v_c)\prod_{k\sim P(w)}(1-P(u_k|v_c))$$
 
 which is equivalent to minimize:
 
-$$-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\&\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}$$
+$$\begin{align}-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}\end{align}$$
 
 Similar to the skip-gram, for CBOW, the negative sampling objective function is:
 
