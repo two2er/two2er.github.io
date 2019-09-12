@@ -68,7 +68,7 @@ As we can see, the shape of the co-occurrence matrix is $\|V\|\times\|V\|$, each
 
 *Word-context matrix* is another count-based method. It builds a word-context matrix $X$, in which $X{ij}$ is the number of times that word $w_i$ appears in the *j*-th linguistic context (for example, a document. do not confuse it with the previous context). Let us denote the number of linguistic contexts as $\|D\|$, then the shape of the word-context matrix would be $\|V\|\times\|D\|$. Since similar words tend to appear in similar contexts, the word-context matrix can also capture similarity between words. The *i*-th word $w_i$ is represented by the *i*-th row of the matrix. However, the word-context correlation metric needs to be modified to get rid of some disadvantages. For example, frequent contexts like "the cat", "an apple", receive higher scores than less frequent but more valuable contexts, like "cute cat", "green apple". Therefore, some would use the metric *pointwise mutual information (PMI)* to calculate $X{ij}$:
 
-$$\text{PMI}(w, c)=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}$$
+$$\begin{align}&\text{PMI}(w, c)\\ &=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}\end{align}$$
 
 PMI rescales values by words' marginal probabilities. Furthermore, the PMI value of word-context pair $(w,c)$ that were never observed in the corpus is $\log(0)=-\infty$. To avoid it, we modify PMI to be *positive PMI (PPMI)*:
 
@@ -88,19 +88,19 @@ Iteration-based methods try to create a model with word vectors as parameters an
 
 At each iteration, the skip-gram model selects a word $w_c$ as the *center word*, and the $2m$ words in its window as the *context words*, where $m$ is the size of the window. Each word is assigned two vector representations: the center word representation $v$ (when it is a center word) and the context word representation $u$ (when it is a context word). The goal of skip-gram model is to find word vectors that are useful to predict context words, or more formally, to maximize the posterior probability:
 
-$$P(u_{c-m}u_{c-m+1}\cdots u_{c-1}u_{c+1}\cdots u_{c+m}\|v_{c})$$
+$$P(u_{c-m}u_{c-m+1}\cdots u_{c-1}u_{c+1}\cdots u_{c+m}|v_{c})$$
 
 The skip-gram model assumes each context word is independent to each other: 
 
-$$P(u_{c-m}u_{c-m+1}\cdots u_{c-1}u_{c+1}\cdots u_{c+m}\|v_{c})=\prod_{-m\leq j\leq m,j\ne0}P(u_{c+j}|v_{c})$$
+$$P(u_{c-m}u_{c-m+1}\cdots u_{c-1}u_{c+1}\cdots u_{c+m}|v_{c})=\prod_{-m\leq j\leq m,j\ne0}P(u_{c+j}|v_{c})$$
 
 The item $P(u_{o}\|v_{c})$ is defined as a softmax function:
 
-$$P(u_{o}|v_{c})=\frac{\exp(u_o^Tv_c)}{\sum_{w=1}^{\|V\|}\exp(u_w^Tv_c)}$$
+$$P(u_{o}|v_{c})=\frac{\exp(u_o^Tv_c)}{\sum_{w=1}^{|V|}\exp(u_w^Tv_c)}$$
 
 To maximize this probability is equivalent to minimize:
 
-$$-\sum_{-m\leq j\leq m,j\ne0}\log P(u_{c+j}\|v_c)=\sum_{-m\leq j\leq m,j\ne0}-u_{c+j}^Tv_c+\log(\sum_{w=1}^V\exp(u_w^Tv_c))$$
+$$-\sum_{-m\leq j\leq m,j\ne0}\log P(u_{c+j}|v_c)=\sum_{-m\leq j\leq m,j\ne0}-u_{c+j}^Tv_c+\log(\sum_{w=1}^V\exp(u_w^Tv_c))$$
 
 This is the objective function of the skip-gram model. Then for each $u$ and $v$, calculate their derivative to update them to optimize the objective.
 
@@ -110,7 +110,7 @@ After finishing training, the center word representations are used as the word v
 
 The *CBOW* model is similar to the skip-gram model, but instead of predicting surrounding words, the CBOW model predicts the center word given all context words. The CBOW also assigns two word vectors to each word: $u$ (when it is a center word) and $v$ (when it is a context word). The goal of CBOW model is to maximize:
 
-$$P(u_c\|v_{c-m},v_{c-m+1},\cdots,v_{c-1},v_{c+1},\cdots,v_{c+m})$$
+$$P(u_c|v_{c-m},v_{c-m+1},\cdots,v_{c-1},v_{c+1},\cdots,v_{c+m})$$
 
 $v_{c-m},v_{c-m+1},\cdots,v_{c-1},v_{c+1},\cdots,v_{c+m}$ can be replaced by their average:
 
@@ -118,7 +118,7 @@ $$\hat{v}=\sum_{-m\leq j\leq m,j\ne0}v_{c+j}$$
 
 Then, the objective can be written as:
 
-$$-\log P(u_c\|\hat{v})=-\log\frac{\exp(u_c^T\hat{v})}{\sum_{w=1}^{\|V\|}\exp(u_w^T\hat{v})}=-u_c^T\hat{v}+\log\sum_{w=1}^{\|V\|}\exp(u_w^T\hat{v})$$
+$$-\log P(u_c|\hat{v})=-\log\frac{\exp(u_c^T\hat{v})}{\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})}=-u_c^T\hat{v}+\log\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})$$
 
 Parameters are updated to optimize the objective at each iteration, just like what we do in the skip-gram model.
 
@@ -132,15 +132,15 @@ where $f(w)$ is the frequency of word $w$ in the corpus. Raising the frequency t
 
 In a negative sampling skip-gram model, the goal is to distinguish between the true context word and negative sampling words. We use the sigmoid function to define the probability:
 
-$$P(u_o\|v_c)=\frac{1}{1+\exp(-u_o^Tv_c)}$$
+$$P(u_o|v_c)=\frac{1}{1+\exp(-u_o^Tv_c)}$$
 
 and the object becomes to maximize:
 
-$$P(u_o\|v_c)\prod_{k\sim P(w)}(1-P(u_k\|v_c))$$
+$$P(u_o|v_c)\prod_{k\sim P(w)}(1-P(u_k|v_c))$$
 
 which is equivalent to minimize:
 
-$$-\log P(u_o\|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k\|v_c))=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}$$
+$$-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}$$
 
 Similar to the skip-gram, for CBOW, the negative sampling objective function is:
 
