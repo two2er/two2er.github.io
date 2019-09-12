@@ -68,7 +68,7 @@ As we can see, the shape of the co-occurrence matrix is $\|V\|\times\|V\|$, each
 
 *Word-context matrix* is another count-based method. It builds a word-context matrix $X$, in which $X{ij}$ is the number of times that word $w_i$ appears in the *j*-th linguistic context (for example, a document. do not confuse it with the previous context). Let us denote the number of linguistic contexts as $\|D\|$, then the shape of the word-context matrix would be $\|V\|\times\|D\|$. Since similar words tend to appear in similar contexts, the word-context matrix can also capture similarity between words. The *i*-th word $w_i$ is represented by the *i*-th row of the matrix. However, the word-context correlation metric needs to be modified to get rid of some disadvantages. For example, frequent contexts like "the cat", "an apple", receive higher scores than less frequent but more valuable contexts, like "cute cat", "green apple". Therefore, some would use the metric *pointwise mutual information (PMI)* to calculate $X{ij}$:
 
-$$\begin{align}&\text{PMI}(w, c)\\ &=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}\end{align}$$
+$$\text{PMI}(w, c)=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}$$
 
 PMI rescales values by words' marginal probabilities. Furthermore, the PMI value of word-context pair $(w,c)$ that were never observed in the corpus is $\log(0)=-\infty$. To avoid it, we modify PMI to be *positive PMI (PPMI)*:
 
@@ -118,7 +118,7 @@ $$\hat{v}=\sum_{-m\leq j\leq m,j\ne0}v_{c+j}$$
 
 Then, the objective can be written as:
 
-$$-\log P(u_c|\hat{v})=-\log\frac{\exp(u_c^T\hat{v})}{\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})}=-u_c^T\hat{v}+\log\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})$$
+$$\begin{align}-\log P(u_c|\hat{v})&=-\log\frac{\exp(u_c^T\hat{v})}{\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})}\\ &=-u_c^T\hat{v}+\log\sum_{w=1}^{|V|}\exp(u_w^T\hat{v})\end{align}$$
 
 Parameters are updated to optimize the objective at each iteration, just like what we do in the skip-gram model.
 
@@ -140,7 +140,7 @@ $$P(u_o|v_c)\prod_{k\sim P(w)}(1-P(u_k|v_c))$$
 
 which is equivalent to minimize:
 
-$$-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}$$
+$$-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\&\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}$$
 
 Similar to the skip-gram, for CBOW, the negative sampling objective function is:
 
