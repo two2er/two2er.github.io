@@ -126,9 +126,9 @@ Parameters are updated to optimize the objective at each iteration, just like wh
 
 Each time we evaluate the objective function of word2vec, we must go through the whole vocabulary, and the time complexity would be $O(\|V\|)$, which is not computationally efficient. To alleviate this, (take the skip-gram as example), we only sample several *negative samples* for each center-context word pair. These negative samples are sampled from a noise distribution $P(w)$,  whose probabilities match the ordering of the frequency of the vocabulary. In practice, we set
 
-$$P(w) =f(w)^{3/4}$$
+$$P(w) =C(w)^{3/4}/Z$$
 
-where $f(w)$ is the frequency of word $w$ in the corpus. Raising the frequency to the $\frac{3}{4}$ power is to increase the probability of rare words. This definition of $P(w)$ works best in practical training.
+where $C(w)$ is the count of word $w$ in the corpus, and $Z$ is the normalization term. Raising the frequency to the $\frac{3}{4}$ power is to increase the probability of rare words. This definition of $P(w)$ works best in practical training.
 
 In a negative sampling skip-gram model, the goal is to distinguish between the true context word and negative sampling words. We use the sigmoid function to define the probability:
 
@@ -160,18 +160,35 @@ wv_from_bin = api.load("word2vec-google-news-300")
 This block of code will load the word vectors set pre-trained with *Google News* corpus. The dimension of the word vectors is 300 and the vocabulary size is about 3 million. You will find something magical happens if you do this kind of vector addition and subtraction:
 
 ```python
-king = wv_from_bin.word_vec('king')
-man = wv_from_bin.word_vec('man')
-woman = wv_from_bin.word_vec('woman')
-wv_from_bin.similar_by_vector(king+woman-man, topn=3)
+# precompute L2-normalized vectors
+wv_from_bin.init_sims()
+# linear combination & normalization
+king = wv_from_bin.word_vec('king', use_norm=True)
+man = wv_from_bin.word_vec('man', use_norm=True)
+woman = wv_from_bin.word_vec('woman', use_norm=True)
+target = (king + woman - man)
+target /= np.linalg.norm(target)
+# find the closest vectors
+dists = np.dot(wv_from_bin.vectors_norm, target)
+best = np.argsort(dists)[-1:-11:-1]
+for idx in best:
+    word = wv_from_bin.index2word[idx]
+    if word not in ['king', 'man', 'woman']:
+        print('word: {:<20}distance: {:<20}'.format(word, dists[idx]))
 
 # ================= output =================
-# [('king', 0.8449392318725586),
-#  ('queen', 0.7300517559051514),
-#  ('monarch', 0.6454660892486572)]
+# word: queen               distance: 0.7118192911148071  
+# word: monarch             distance: 0.6189674139022827  
+# word: princess            distance: 0.5902431011199951  
+# word: crown_prince        distance: 0.5499460697174072  
+# word: prince              distance: 0.5377321243286133  
+# word: kings               distance: 0.5236844420433044  
+# word: Queen_Consort       distance: 0.5235945582389832  
+# word: queens              distance: 0.518113374710083   
+# word: sultan              distance: 0.5098593235015869
 ```
 
-We can see that the word vector of "queen" is in the result top list! This is an interesting property of word2vec, proving its powerful ability to capture word similarity. Due to its impressive performance, word2vec has become one of the most popular word embedding methods. To some extend, it is a milestone of NLP, especially for deep learning, and attracts millions of students to plunge into deep learning...
+We can see that the word vector of "queen" is at the top of the result list! This is an interesting property of word2vec, proving its powerful ability to capture word similarity. Due to its impressive performance, word2vec has become one of the most popular word embedding methods. To some extend, it is a milestone of NLP, especially for deep learning, and attracts millions of students to plunge into deep learning...
 
 ## Reference
 
