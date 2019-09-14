@@ -140,13 +140,13 @@ $$P(u_o|v_c)\prod_{k\sim P(w)}(1-P(u_k|v_c))$$
 
 which is equivalent to minimize:
 
-$$\begin{array}-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^Tv_c)}\end{array}$$
+$$\begin{array}-\log P(u_o|v_c)-\sum_{k\sim P(w)}\log(1-P(u_k|v_c))\\=-\log\frac{1}{1+\exp(-u_o^Tv_c)}-\sum_{k\sim P(w)}\log\frac{1}{1+\exp(u_k^Tv_c)}\end{array}$$
 
 Similar to the skip-gram, for CBOW, the negative sampling objective function is:
 
-$$-\log\frac{1}{1+\exp(-u_c^T\hat{v})}-\sum_{k\sim P(w)}\frac{1}{1+\exp(u_k^T\hat{v})}$$
+$$-\log\frac{1}{1+\exp(-u_c^T\hat{v})}-\sum_{k\sim P(w)}\log\frac{1}{1+\exp(u_k^T\hat{v})}$$
 
-[code here]()
+[code here](<https://github.com/two2er/ml-toys/blob/master/NLP/word_vectors/word2vec.py>)
 
 ## Summary
 
@@ -168,7 +168,7 @@ man = wv_from_bin.word_vec('man', use_norm=True)
 woman = wv_from_bin.word_vec('woman', use_norm=True)
 target = (king + woman - man)
 target /= np.linalg.norm(target)
-# find the closest vectors
+# find the most similar vectors (cosine similarity)
 dists = np.dot(wv_from_bin.vectors_norm, target)
 best = np.argsort(dists)[-1:-11:-1]
 for idx in best:
