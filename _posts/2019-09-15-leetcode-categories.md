@@ -5,7 +5,7 @@ excerpt: "LeetCode问题的解答，按算法分类。"
 categories: [Algorithm]
 comments: true
 image:
-  feature: LeetCode.png
+  feature: leetcode.jpg
 ---
 
 ---
