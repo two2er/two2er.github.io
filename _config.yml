@@ -25,7 +25,7 @@ collections:
     permalink: /articles/:year-:month/:title
   pages:
     output: true
-    permalink: /pages/:year-:month/:title
+    permalink: /pages/:path
 
 kramdown:
   auto_ids: true
