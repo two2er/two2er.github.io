@@ -14,11 +14,12 @@
       <li class="nav-item">
         <a href="{{ site.url }}/">home</a>
       </li>
-      {% for page in site.pages %} {% if page.title %}
       <li class="nav-item">
-        <a href="{{ site.url }}{{ page.url }}">{{ page.title }}</a>
+        <a href="/categories">categories</a>
       </li>
-      {% endif %} {% endfor %}
+      <li class="nav-item">
+        <a href="/archive">archive</a>
+      </li>
     </ul>
   </nav>
   {% include social-links.html %}
