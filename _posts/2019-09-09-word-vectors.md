@@ -74,7 +74,7 @@ PMI rescales values by words' marginal probabilities. Furthermore, the PMI value
 
 $$\text{PPMI}(w,c)=\max(\text{PMI}(w,c),0)$$
 
-The co-occurrence matrix can also be improved with PMI metric. A common shortcoming of PMI and PPMI is that, if the context $c$ is rare in the corpus, the $#(c)$ values would be very small, which cause the PMI value very high. As a result, those contexts most similar to a word, are usually rare contexts, even though they are not so semantically related to the word.
+The co-occurrence matrix can also be improved with PMI metric. A common shortcoming of PMI and PPMI is that, if the context $c$ is rare in the corpus, the $\\#(c)$ values would be very small, which cause the PMI value very high. As a result, those contexts most similar to a word, are usually rare contexts, even though they are not so semantically related to the word.
 
 Although carefully defined, many count-based methods including co-occurrence matrix and word-context matrix have to face the problem that the counting matrix is sparse and high-dimensional. As well, when new words come into the corpus or the corpus is changed, it is hard to update the matrix, which would even change the shape of the matrix. That's why we need iteration-based methods, which could overcome these difficulties in elegant way.
 
@@ -192,10 +192,14 @@ for idx in best:
 
 We can see that the word vector of "queen" is at the top of the result list! This is an interesting property of word2vec, proving its powerful ability to capture word similarity. Due to its impressive performance, word2vec has become one of the most popular word embedding methods.
 
+However, is that necessary iteration-based methods outperform count-based methods, since they have so many advantages? The answer might be no. Actually, word2vec is window-based, which poorly utilizes the statistics of the whole corpus but focuses on local contexts. The GloVe model tried to combine the advantages of both traditional and iterative methods, but in the paper of Omer Levy, the author pointed out that by effectively tuning hyperparameters, the performance of these models would be largely comparable. This means that there is still no mature method, which could outperform all other methods.
+
 ## Reference
 
 - *Neural Network Methods for Natural Language Processing*. Yoav Goldberg.
 - *Distributed Representations of Words and Phrases and their Compositionality*. Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg Corrado, and Jeffrey Dean.
+- *GloVe: Global Vectors for Word Representation*. Jeffrey Pennington, Richard Socher, Christopher D. Manning.
+- *Improving Distributional Similarity with Lessons Learned from Word  Embeddings*. Omer Levy, Yoav Goldberg, Ido Dagan
 - [CS224n](https://web.stanford.edu/class/cs224n/ )
 - [Dive into Deep Learning](<https://www.d2l.ai/>)
 
