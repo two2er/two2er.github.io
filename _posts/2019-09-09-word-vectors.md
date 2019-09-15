@@ -66,7 +66,7 @@ As we can see, the shape of the co-occurrence matrix is $\|V\|\times\|V\|$, each
 
 ## Word-Context Matrix
 
-*Word-context matrix* is another count-based method. It builds a word-context matrix $X$, in which $X{ij}$ is the number of times that word $w_i$ appears in the *j*-th linguistic context (for example, a document. do not confuse it with the previous context). Let us denote the number of linguistic contexts as $\|D\|$, then the shape of the word-context matrix would be $\|V\|\times\|D\|$. Since similar words tend to appear in similar contexts, the word-context matrix can also capture similarity between words. The *i*-th word $w_i$ is represented by the *i*-th row of the matrix. However, the word-context correlation metric needs to be modified to get rid of some disadvantages. For example, frequent contexts like "the cat", "an apple", receive higher scores than less frequent but more valuable contexts, like "cute cat", "green apple". Therefore, some would use the metric *pointwise mutual information (PMI)* to calculate $X{ij}$:
+*Word-context matrix* is another count-based method. It builds a word-context matrix $X$, in which $X{ij}$ is the number of times that word $w_i$ appears in the *j*-th linguistic context (for example, a document. the linguistic context can even be words, which would result in co-occurrence matrix). Let us denote the number of linguistic contexts as $\|D\|$, then the shape of the word-context matrix would be $\|V\|\times\|D\|$. Since similar words tend to appear in similar contexts, the word-context matrix can also capture similarity between words. The *i*-th word $w_i$ is represented by the *i*-th row of the matrix. However, the word-context correlation metric needs to be modified to get rid of some disadvantages. For example, frequent contexts like "the cat", "an apple", receive higher scores than less frequent but more valuable contexts, like "cute cat", "green apple". Therefore, some would use the metric *pointwise mutual information (PMI)* to calculate $X{ij}$:
 
 $$\text{PMI}(w, c)=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}$$
 
@@ -74,7 +74,7 @@ PMI rescales values by words' marginal probabilities. Furthermore, the PMI value
 
 $$\text{PPMI}(w,c)=\max(\text{PMI}(w,c),0)$$
 
-The co-occurrence matrix can also be improved with PMI metric. A common shortcoming of PMI and PPMI is that, if the context $c$ is rare in the corpus, the $\#(c)$ values would be very small, which cause the PMI value very high. As a result, those contexts most similar to a word, are usually rare contexts, even though they are not so semantically related to the word.
+The co-occurrence matrix can also be improved with PMI metric. A common shortcoming of PMI and PPMI is that, if the context $c$ is rare in the corpus, the $#(c)$ values would be very small, which cause the PMI value very high. As a result, those contexts most similar to a word, are usually rare contexts, even though they are not so semantically related to the word.
 
 Although carefully defined, many count-based methods including co-occurrence matrix and word-context matrix have to face the problem that the counting matrix is sparse and high-dimensional. As well, when new words come into the corpus or the corpus is changed, it is hard to update the matrix, which would even change the shape of the matrix. That's why we need iteration-based methods, which could overcome these difficulties in elegant way.
 
@@ -150,9 +150,9 @@ $$-\log\frac{1}{1+\exp(-u_c^T\hat{v})}-\sum_{k\sim P(w)}\log\frac{1}{1+\exp(u_k^
 
 [code here](<https://github.com/two2er/ml-toys/blob/master/NLP/word_vectors/word2vec.py>)
 
-## Summary
+### Word2vec Summary
 
-In this article, I introduced 4 common methods to generate word vectors, and showed their basic ideas by formulas and codes. You may start to have a general understanding of word embeddings. There are many pre-trained word vectors for you to download and use from the Internet. You can choose one you like and explore it. For example, you can use APIs from Python libraries:
+There are many pre-trained word vectors for you to download and use from the Internet. You can choose one you like and explore it. For example, you can use APIs from Python libraries:
 
 ```python
 import gensim.downloader as api
@@ -190,7 +190,7 @@ for idx in best:
 # word: sultan              distance: 0.5098593235015869
 ```
 
-We can see that the word vector of "queen" is at the top of the result list! This is an interesting property of word2vec, proving its powerful ability to capture word similarity. Due to its impressive performance, word2vec has become one of the most popular word embedding methods. To some extend, it is a milestone of NLP, especially for deep learning, and attracts millions of students to plunge into deep learning...
+We can see that the word vector of "queen" is at the top of the result list! This is an interesting property of word2vec, proving its powerful ability to capture word similarity. Due to its impressive performance, word2vec has become one of the most popular word embedding methods.
 
 ## Reference
 
