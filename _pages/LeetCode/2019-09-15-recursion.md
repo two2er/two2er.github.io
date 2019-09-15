@@ -73,4 +73,39 @@ class Solution:
 
 $$\begin{array}f(N)=f(1)+f(N-1-1)+f(3)+f(N-1-3)+\cdots+f(N-1-1)+f(1)\\=2[f(1)+f(3)+\cdots+f(N-2)]\\\ge 2f(N-2)\ge 2^2f(N-4)\cdots \ge 2^{N/2} \end{array}$$
 
-因此时间复杂度的下界为$\Omega(2^N)$。空间复杂度应该跟最大层数有关，应为$O(\log N)$，不是很明白为什么LeetCode的标准答案那是$O(2^N)$。
+因此时间复杂度的下界为$\Omega(2^N)$。空间复杂度与FST数目有关，也可以用类似的方法求出。
+
+## 761*. Special Binary String
+
+<https://leetcode.com/problems/special-binary-string/>
+
+> *Special* binary strings are binary strings with the following two properties:
+>
+> - The number of 0's is equal to the number of 1's.
+>
+> - Every prefix of the binary string has at least as many 1's as 0's.
+>
+> Given a special string `S`, a *move* consists of choosing two consecutive, non-empty, special substrings of `S`, and swapping them. *(Two strings are consecutive if the last character of the first string is exactly one index before the first character of the second string.)*
+>
+> At the end of any number of moves, what is the lexicographically largest resulting string possible?
+
+这道题我不会做，是看[这个答案](<https://leetcode.com/problems/special-binary-string/discuss/113211/JavaC%2B%2BPython-Easy-and-Concise-Recursion>)的。我在看这篇答案之后，想了一会才明白是怎么回事。我认为这道题最关键的一点，就是要清楚：通过代码中**计算count**的方法找出的`S[i:j]`如果是一个special string，那么`S[i+1:j-1]`的任何一个子串，都不会和`S[:i+1]`，`S[j:]`的子串进行交换，即，special string内部的子串不会“跑出”这个special string。这是因为：
+
+1. special string `S[i:j]`的内部子串`S[i+1:j-1]`，仍然是一个special string。这是由于special string两个条件的限制。`S[i:j]`的首尾两个字符肯定是1和0，因为它的前缀总是要保持1的数目不小于0。同时，由于`S[i:k]`，`i < k < j`，中，1的数目总是大于0，所以`S[i+1:k]`中1的数目不小于0，满足第二个条件。且`S[i+1:j-1]`中1的数目等于0，可以推出它是一个special string。
+2. `S[k:v]`，`i < k < j < v`，不可能是一个special string。假设它是一个special string，那么`S[k:j]`中1的数目不小于0。由于`S[j-1]`是0，所以`S[k:j-1]`中1的数目大于0。同时，`S[i+1:j-1]`中1的数目等于0的数目，因此`S[i:k]`中0的数目大于1。这与第二个条件矛盾。因此，`S[k:v]`不是一个special string，它就不会跟后面的special string交换，`S[k:j]`就保留在`S[i:j]`内部。`S[w:k]`，`w < i < k < j`也是同理。
+
+因此，就可以通过计算count的方法，将`S`划分成若干special string。这些special string可以两两换位，因此它们之间的排序是随意的。只需要处理好它们的内部，然后用字典序将这些special string排好就可以了。
+
+```python
+def makeLargestSpecial(self, S: str) -> str:
+	start = 0   # start of a special string
+	count = 0   # count of 1s in the current special string
+	res = []
+	for i, c in enumerate(S):
+	    count = count + 1 if c == '1' else count - 1
+	    if count == 0:
+	        res.append('1'+self.makeLargestSpecial(S[start+1:i])+'0')
+	        start = i + 1
+	return ''.join(sorted(res)[::-1])
+```
+
