@@ -42,7 +42,7 @@ From this, you will find that BOW is problematic. As well, if the size of the vo
 
 $$\mathbf{M}=\mathbf{USV}^T$$
 
-where $\mathbf{S}$ is the singular value matrix, and $\mathbf{U}$ and $\mathbf{V}$ are two orthogonal matrices. After sorting singular values in $\mathbf{S}$ from big to small, take the first $k$ columns of $\mathbf{U}$ as word vectors, where $k$ is the word vector dimension we desire.
+where $\mathbf{S}$ is the singular value matrix, and $\mathbf{U}$ and $\mathbf{V}$ are two orthonormal matrices. After sorting singular values in $\mathbf{S}$ from big to small, take the first $k$ columns of $\mathbf{U}$ as word vectors, where $k$ is the word vector dimension we desire.
 
 [code here](<https://github.com/two2er/ml-toys/blob/master/NLP/word_vectors/one_hot.py>)
 
@@ -73,6 +73,8 @@ $$\text{PMI}(w, c)=\log\frac{\#(w,c)\cdot|D|}{\#(w)\cdot\#(c)}$$
 PMI rescales values by words' marginal probabilities. Furthermore, the PMI value of word-context pair $(w,c)$ that were never observed in the corpus is $\log(0)=-\infty$. To avoid it, we modify PMI to be *positive PMI (PPMI)*:
 
 $$\text{PPMI}(w,c)=\max(\text{PMI}(w,c),0)$$
+
+The co-occurrence matrix can also be improved with PMI metric. A common shortcoming of PMI and PPMI is that, if the context $c$ is rare in the corpus, the $\#(c)$ values would be very small, which cause the PMI value very high. As a result, those contexts most similar to a word, are usually rare contexts, even though they are not so semantically related to the word.
 
 Although carefully defined, many count-based methods including co-occurrence matrix and word-context matrix have to face the problem that the counting matrix is sparse and high-dimensional. As well, when new words come into the corpus or the corpus is changed, it is hard to update the matrix, which would even change the shape of the matrix. That's why we need iteration-based methods, which could overcome these difficulties in elegant way.
 
