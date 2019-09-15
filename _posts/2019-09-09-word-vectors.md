@@ -100,7 +100,7 @@ $$P(u_{o}|v_{c})=\frac{\exp(u_o^Tv_c)}{\sum_{w=1}^{|V|}\exp(u_w^Tv_c)}$$
 
 To maximize this probability is equivalent to minimize:
 
-$$-\sum_{-m\leq j\leq m,j\ne0}\log P(u_{c+j}|v_c)=\sum_{-m\leq j\leq m,j\ne0}\left(-u_{c+j}^Tv_c+\log(\sum_{w=1}^|V|\exp(u_w^Tv_c))\right)$$
+$$-\sum_{-m\leq j\leq m,j\ne0}\log P(u_{c+j}|v_c)=\sum_{-m\leq j\leq m,j\ne0}\left(-u_{c+j}^Tv_c+\log(\sum_{w=1}^{|V|}\exp(u_w^Tv_c))\right)$$
 
 This is the objective function of the skip-gram model. Then for each $u$ and $v$, calculate their derivative to update them to optimize the objective.
 
