@@ -109,3 +109,126 @@ def makeLargestSpecial(self, S: str) -> str:
 	return ''.join(sorted(res)[::-1])
 ```
 
+## 726. Number of Atoms
+
+<https://leetcode.com/problems/number-of-atoms/>
+
+> Given a chemical `formula` (given as a string), return the count of each atom.
+>
+> An atomic element always starts with an uppercase character, then zero or more lowercase letters, representing the name.
+>
+> 1 or more digits representing the count of that element may follow if the count is greater than 1. If the count is 1, no digits will follow. For example, H2O and H2O2 are possible, but H1O2 is impossible.
+>
+> Two formulas concatenated together produce another formula. For example, H2O2He3Mg4 is also a formula.
+>
+> A formula placed in parentheses, and a count (optionally added) is also a formula. For example, (H2O2) and (H2O2)3 are formulas.
+>
+> Given a formula, output the count of all elements as a string in the following form: the first name (in sorted order), followed by its count (if that count is more than 1), followed by the second name (in sorted order), followed by its count (if that count is more than 1), and so on.
+
+这道题很繁琐，但是思路很清晰，遇到括号，把括号里的东西递归求解就可以了。我的编程很面向过程，因此不倡导，在[这里](<https://leetcode.com/problems/number-of-atoms/discuss/140802/Python-20-lines-very-readable-simplest-and-shortest-solution-36-ms-beats-100>)有一个使用栈的非常简洁的回答，可以学习学习，美化代码。
+
+时间复杂度跟字符串长度有关，$O(S)$。
+
+```python
+def countOfAtoms(self, formula: str) -> str:
+	def recursive(formula):
+	    # if meet a formula in parentheses, count its elements recursively
+	    count = {}
+	    i = 0
+	    while i < len(formula):
+	        if i == len(formula) - 1:
+	            if formula[-1] not in count:
+	                count[formula[-1]] = 1
+	            else:
+	                count[formula[-1]] += 1
+	            break
+	        j = i + 1
+	        if 'A' <= formula[i] <= 'Z':
+	            # scan lowercase letters
+	            while j < len(formula) and 'a' <= formula[j] <= 'z':
+	                j += 1
+	            element_name = formula[i:j]
+	            # scan numbers
+	            i = j
+	            while j < len(formula) and '0' <= formula[j] <= '9':
+	                j += 1
+	            element_num = int(formula[i:j]) if j > i else 1
+	            if element_name not in count:
+	                count[element_name] = element_num
+	            else:
+	                count[element_name] += element_num
+	        else:  # meet a parentheses
+	            parentheses_count = 1
+	            while parentheses_count > 0:
+	                if formula[j] == ')':
+	                    parentheses_count -= 1
+	                    if parentheses_count == 0:
+	                        break
+	                elif formula[j] == '(':
+	                    parentheses_count += 1
+	                j += 1
+	            sub_count = recursive(formula[i + 1:j])
+	            # scan numbers
+	            j += 1
+	            i = j
+	            while j < len(formula) and '0' <= formula[j] <= '9':
+	                j += 1
+	            element_num = int(formula[i:j]) if j > 1 else 1
+	            # combine sub_count
+	            for k, v in sub_count.items():
+	                if k not in count:
+	                    count[k] = element_num * sub_count[k]
+	                else:
+	                    count[k] += element_num * sub_count[k]
+	        i = j
+	    return count
+
+	count = recursive(formula)
+	sorted_count = sorted([(k, v) for k, v in count.items()], key=lambda x: x[0])
+	res = ''
+	for each in sorted_count:
+	    res += each[0] + (str(each[1]) if each[1] > 1 else '')
+	return res
+```
+
+## 698. Partition to K Equal Sum Subsets
+
+<https://leetcode.com/problems/partition-to-k-equal-sum-subsets/>
+
+这个题，最经典的解法，居然是DFS暴力搜索。单纯这样写代码是会超时的，看了[这位大神](<https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/108741/Solution-with-Reference>)的代码，意识到可以将`nums`事先排好序，再进行搜索，可以节省很多时间（因为`False`的那些测试用例会更早返回）。加上了排序的代码击败了5%的Python3代码。看了一眼讨论区，有另[一位大神](<https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/146579/Easy-python-28-ms-beats-99.5>)，用非常类似的代码，击败了95% （我提交的时候是75%），原因是多了这么一段
+
+```python
+if bucket[j] == bound:
+	return False
+```
+
+我初看时，以为是在某个数字大于桶容量时返回，但仔细想想才发现不完全是，这是因为DFS搜索是按桶从左到右放的，前若干个桶为非空桶，后几个为空桶（如果有的话）。如果用一个空桶装`nums[i]`，而无法完美装下剩下的数字的话，那用下一个空桶装，也是不行的。而那些非空桶，因为排在空桶前面，早就试过了，肯定不行（不然早返回`True`了），因此在`bucket[j] == bound`时就能判断出这组测试用例是`False`的了。
+
+膜拜大神……
+
+```python
+class Solution:
+    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+        sums = sum(nums)
+        if len(nums) < k or sums % k != 0:
+            return False
+        bound = sums//k
+        bucket = [bound] * k
+        nums.sort(reverse=True)
+        
+        def dfs(i):
+            if i == len(nums):
+                return True
+            for j in range(k):
+                if nums[i] <= bucket[j]:
+                    bucket[j] -= nums[i]
+                    if dfs(i+1):
+                        return True
+                    bucket[j] += nums[i]
+                if bucket[j] == bound:
+                    return False
+            return False
+            
+        return dfs(0)
+```
+
