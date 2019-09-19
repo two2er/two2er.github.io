@@ -195,6 +195,8 @@ def countOfAtoms(self, formula: str) -> str:
 
 <https://leetcode.com/problems/partition-to-k-equal-sum-subsets/>
 
+> Given an array of integers `nums` and a positive integer `k`, find whether it's possible to divide this array into `k` non-empty subsets whose sums are all equal.
+
 这个题，最经典的解法，居然是DFS暴力搜索。单纯这样写代码是会超时的，看了[这位大神](<https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/108741/Solution-with-Reference>)的代码，意识到可以将`nums`事先排好序，再进行搜索，可以节省很多时间（因为`False`的那些测试用例会更早返回）。加上了排序的代码击败了5%的Python3代码。看了一眼讨论区，有另[一位大神](<https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/146579/Easy-python-28-ms-beats-99.5>)，用非常类似的代码，击败了95% （我提交的时候是75%），原因是多了这么一段
 
 ```python
@@ -207,28 +209,56 @@ if bucket[j] == bound:
 膜拜大神……
 
 ```python
+def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+	sums = sum(nums)
+	if len(nums) < k or sums % k != 0:
+	    return False
+	bound = sums//k
+	bucket = [bound] * k
+	nums.sort(reverse=True)
+	
+	def dfs(i):
+	    if i == len(nums):
+	        return True
+	    for j in range(k):
+	        if nums[i] <= bucket[j]:
+	            bucket[j] -= nums[i]
+	            if dfs(i+1):
+	                return True
+	            bucket[j] += nums[i]
+	        if bucket[j] == bound:
+	            return False
+	    return False
+	    
+	return dfs(0)
+```
+
+## 687. Longest Univalue Path
+
+<https://leetcode.com/problems/longest-univalue-path/>
+
+> Given a binary tree, find the length of the longest path where each node in the path has the same value. This path may or may not pass through the root.
+>
+> The length of path between two nodes is represented by the number of edges between them.
+
+一棵树上的LUP，一共有三种可能：1）它在左子树上；2）它在右子树上；3）它穿过了根节点。前两种非常好解决，用递归就可以了。第三种情况比较麻烦，它需要计算从根节点出发，往左右子树，能去到的最远距离。这又是一个递归问题，所以又写了一个方法来处理。
+
+```python
 class Solution:
-    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
-        sums = sum(nums)
-        if len(nums) < k or sums % k != 0:
-            return False
-        bound = sums//k
-        bucket = [bound] * k
-        nums.sort(reverse=True)
-        
-        def dfs(i):
-            if i == len(nums):
-                return True
-            for j in range(k):
-                if nums[i] <= bucket[j]:
-                    bucket[j] -= nums[i]
-                    if dfs(i+1):
-                        return True
-                    bucket[j] += nums[i]
-                if bucket[j] == bound:
-                    return False
-            return False
-            
-        return dfs(0)
+    def longestUnivaluePath(self, root: TreeNode) -> int:
+        if root is None:
+            return 0
+        left_longest = self.longestUnivaluePath(root.left)
+        right_longest = self.longestUnivaluePath(root.right)
+        self_longest = self.selfUnivaluePath(root.left, root.val)
+                       + self.selfUnivaluePath(root.right, root.val)
+        return max(self_longest, left_longest, right_longest)
+
+    def selfUnivaluePath(self, root: TreeNode, val) -> int:
+        if root is None or root.val != val:
+            return 0
+        child_longest = max(self.selfUnivaluePath(root.left, val),
+                            self.selfUnivaluePath(root.right, val)) + 1
+        return child_longest
 ```
 

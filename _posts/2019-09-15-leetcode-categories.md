@@ -4,8 +4,6 @@ title: LeetCode问题分类解答
 excerpt: "LeetCode问题的解答，按算法分类。"
 categories: [Algorithm]
 comments: true
-image:
-  feature: leetcode.jpg
 ---
 
 ---
@@ -14,4 +12,5 @@ image:
 
 - [递归](/pages/LeetCode/2019-09-15-recursion)
 - [动态规划](/pages/LeetCode/2019-09-15-DP)
+- [贪心算法](/pages/LeetCode/2019-09-17-greedy)
 
