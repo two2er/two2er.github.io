@@ -80,7 +80,7 @@ In summary, the process of Back Propagation is as following:
 
  - firstly, do forward propagation to calculate necessary values:
 
-  $$\begin{aligned}Z^l&=A^{l-1}W^l+b^l\\A^l=&\sigma(Z^l)\end{aligned}$$
+  $$\begin{aligned}Z^l&=A^{l-1}W^l+b^l\\A^l&=\sigma(Z^l)\end{aligned}$$
 
  - secondly, compute the error of the output layer:
 
