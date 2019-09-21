@@ -80,21 +80,20 @@ In summary, the process of Back Propagation is as following:
 
  - firstly, do forward propagation to calculate necessary values:
 
-  $$\begin{array}Z^l=A^{l-1}W^l+b^l\\A^l=\sigma(Z^l)\end{array}$$
+  $$\begin{aligned}Z^l&=A^{l-1}W^l+b^l\\A^l=&\sigma(Z^l)\end{aligned}$$
 
  - secondly, compute the error of the output layer:
 
   $$\delta^L=\frac{\partial C}{\partial Z^L}=\frac{\partial C}{\partial A^L}\odot\sigma'(Z^L)$$
 
- - then, from the expression of the error of the output layer, and the recurrence formula:
+ - then, from the expression of the error of the output layer, and the recurrence formula to calculate errors of each layer in the network:
 
   $$\delta^l=\delta^{l+1}(W^{l+1})^T\odot \sigma'(Z^l)$$
 
-  calculate errors of each layer in the network.
-
  - finally, we use these errors to compute the derivatives of each parameter, and update them:
-$$\begin{array}\frac{\partial C}{\partial W^l}=(A^{l-1})^T\delta^l\\
-\frac{\partial C}{\partial b^l}=\sum_k\delta_k^l\end{array}$$
+
+  $$\begin{aligned}\frac{\partial C}{\partial W^l}&=(A^{l-1})^T\delta^l\\
+  \frac{\partial C}{\partial b^l}&=\sum_k\delta_k^l\end{aligned}$$
 
 I implemented a simple neural network with mini-batch Back Propagation in my [Github repository](<https://github.com/two2er/ml-toys/blob/master/supervised/neural_network.py>), which might be a help for you to understand these formulas.
 
