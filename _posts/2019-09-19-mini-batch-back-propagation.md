@@ -18,7 +18,7 @@ Given a neural network, suppose it has $L$ layers. In  the forward propagation p
 
 $$Z^l=A^{l-1}W^l+b^l\tag{1}$$
 
-where the $W^l$ is the weight matrix of edges connecting the $(l-1)$-th layer and the $l$-th layer, and the $b^l$ is its bias. The shape of $A^{l-1}$ is $(m,n^{l-1})$, where $n^{l-1}$ is the number of neurons in the $(l-1)$-th layer. The shape of $W^l$ is $(n^{l-1},n^l)$, and the shape of $b^l$ is $(1,n^l)$. $W_{ij}^l$ is the weight of the edge connecting the $i$-th neuron of the $l$-th layer and the $j$-th neuron of the $(l+1)$-th layer. Note that the addition between $A^{l-1}W^l$ and $b^l$ is similar to "broadcasting" in Numpy. $b^l$ would be added to each row of $A^{l-1}W^l$.
+where the $W^l$ is the weight matrix of edges connecting the $(l-1)$-th layer and the $l$-th layer, and the $b^l$ is its bias. The shape of $A^{l-1}$ is $(m,n^{l-1})$, where $n^{l-1}$ is the number of neurons in the $(l-1)$-th layer. The shape of $W^l$ is $(n^{l-1},n^l)$, and the shape of $b^l$ is $(1,n^l)$. $W_{ij}^l$ is the weight of the edge connecting the $i$-th neuron of the $(l-1)$-th layer and the $j$-th neuron of the $l$-th layer. Note that the addition between $A^{l-1}W^l$ and $b^l$ is similar to "broadcasting" in Numpy. $b^l$ would be added to each row of $A^{l-1}W^l$.W
 
 After the linear transformation, we apply the activate function to $Z^l$:
 
