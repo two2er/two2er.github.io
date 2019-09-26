@@ -45,7 +45,7 @@ By the way, note that $\frac{1}{1-\beta}\sum_{i=1}^n\beta^{n-i}=1-\beta^n$. Ther
 
 To solve the problem of fixed learning rate, one very intuitive idea might be altering the learning rate during the process of gradient descent. Also intuitively, we want the learning rate decreasing during the process. The larger the gradient, the more the learning rate would decrease. So, we can design the learning rate updating rule as:
 
-$$\begin{align}s_n\leftarrow s_{n-1}+\nabla_n^2\\c\leftarrow c-\frac{\eta}{\sqrt{s_n+\epsilon}}\nabla_n$$
+$$\begin{aligned}s_n&\leftarrow s_{n-1}+\nabla_n^2\\c\leftarrow &c-\frac{\eta}{\sqrt{s_n+\epsilon}}\nabla_n\end{aligned}$$
 
 Where $\epsilon$ is a small constant value for numerical stability. We can see that the learning rate (now it is $\frac{\eta}{\sqrt{s_n+\epsilon}}$) is keeping decreasing. If the parameter has a constant and large partial derivative, the learning rate would drop faster for this parameter, while if the gradient of the parameter remains small, its learning rate would decline more slowly. This can help us prevent from overshooting while keeping a fast learning speed. However, the method (or, **adagrad**) still has some problems. Since the $s_n$ is an accumulation of $\nabla_1,\cdots,\nabla_n$, at later stages of iteration the learning rate would become too small for updating, and the path just likes getting "stuck" at the point. We have to improve the updating rule of $s$ further.
 
@@ -67,7 +67,7 @@ $$c\leftarrow c-\sqrt{\frac{\delta_{n-1}+\epsilon}{s_n+\epsilon}}\nabla_n$$
 
 where $\delta x$ is an exponentially weighted accumulation of the update value (denote it by $g_n'=\sqrt{\frac{\delta_{n-1}+\epsilon}{s_n+\epsilon}}\nabla_n$):
 
-$$\delta_n\leftarrow \beta\delta{n-1}+(1-\pho)g_n'$$
+$$\delta_n\leftarrow \beta\delta{n-1}+(1-\rho)g_n'$$
 
 The hyperparameter $\eta$ is replaced by the variable $\sqrt{\delta}$. The Adadelta method gets rid of the need to tune the learning rate parameter, while keeps the training process robust and even has better performance.
 
