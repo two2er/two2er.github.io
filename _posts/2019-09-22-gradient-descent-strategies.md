@@ -16,13 +16,13 @@ where the $\eta$ is the learning rate, or the step size. Though simple, GD has s
 
 - If the parameters are not normalized before training, it is likely to slow down the speed of convergence. The reason is that the learning rates for each parameter are the same. If a parameter is much greater than another parameter, it might get a larger gradient and overshoot. As well, the path to the minimum would oscillate:
 
-  ![1569527252988](https://two2er.github.io/img/gradient_descent_strategies/oscillate.jpg)
+  ![oscillate](https://two2er.github.io/img/gradient_descent_strategies/oscillate.jpg)
 
   All these will increase the difficulty of training. A simple solution is to set a relatively small learning rate for the model, but it would slow down the training process, which is also not what we expect.
 
 - Since the learning rate is invariable, after some iterations, the parameters would reach their minimum. However, if the learning rate is too large, the parameters might "skip" the minimum, and fail to converge.
 
-  ![1569522726545](https://two2er.github.io/img/gradient_descent_strategies/overshooting.jpg)
+  ![overshooting](https://two2er.github.io/img/gradient_descent_strategies/overshooting.jpg)
 
 To improve these, some parameter optimization algorithms have been proposed. In this article, 5 ideas to improve GD would be introduced. They are: Momentum, Adagrad, RMSProp, Adadelta, and Adam. They are all based on GD, and are still iteration-based, but with some modifications on hyperparameters.
 
@@ -57,7 +57,7 @@ $$
 
 According to the last equation, $v_n$ is the weighted average of $\nabla_1,\nabla_2,\cdots,\nabla_n$. With Momentum, the direction of the gradient at the current iteration is more similar to the direction of that at the previous iteration. The gradient path seems to be "smoothed", and oscillates less. 
 
-![1569527228723](https://two2er.github.io/img/gradient_descent_strategies/momentum.jpg)
+![momentum](https://two2er.github.io/img/gradient_descent_strategies/momentum.jpg)
 
 On the other hand, we can imagine the $v$ as the "velocity" of the descendent path. It seems that the $\nabla_n$ for the $v_n$ at the $n$-th iteration is its "accelaration", and $v_{n-1}$ is its current velocity. This simulation to physical motion gives gradient descent the "inertia", and therefore the direction of the gradient varies less. This can help to avoid problems like oscillation and overshooting.
 
@@ -81,7 +81,7 @@ $$\begin{aligned}s_n&\leftarrow s_{n-1}+\nabla_n^2\\c\leftarrow &c-\frac{\eta}{\
 
 where the $\epsilon$ is a small constant value for numerical stability. At each iteration, the $s_n$ is added to the square of the gradient, so the denominator of the learning rate increases, keeping reducing the learning rate. If the parameter has a constant and large partial derivative, the learning rate would drop faster for this parameter, while if the gradient of the parameter remains small, its learning rate would decline more slowly. This prevents the model from overshooting while keeping a fast learning speed. The trick is called **adaptive learning rate**, which is the core idea of **Adagrad**. However, the Adagrad still has some problems. Since the $s_n$ is an accumulation of $\nabla_1$ to $\nabla_n$, at later stages of iteration the learning rate would become too small for updating, and the descendent path just likes getting "stuck" at the point.
 
-![https://two2er.github.io/img/gradient_descent_strategies/adagrad.jpg]()
+![adagrad](https://two2er.github.io/img/gradient_descent_strategies/adagrad.jpg)
 
 This is due to the unreasonable design of $s$. The next step to perfect the gradient descent, would be finding a more reliable $s$, which could get rid of the problem of learning rate disappearing. 
 
@@ -100,7 +100,7 @@ $$s_n\leftarrow \gamma s_{n-1}+(1-\gamma)\nabla_n^2$$
 
 where $\gamma$ is similar to the $\beta$, a constant value between 0 and 1. As discussed before, the sum of weights is $1-\gamma^n$, so the $s_n$ could not be a too large number to invalidate the learning rate. Even after iterations of gradient descent, the model still remains the power to go forward, and finally reaches to the minimum.
 
-![https://two2er.github.io/img/gradient_descent_strategies/rmsprop.jpg]()
+![rmsprop](https://two2er.github.io/img/gradient_descent_strategies/rmsprop.jpg)
 
 **RMSProp**:
 
