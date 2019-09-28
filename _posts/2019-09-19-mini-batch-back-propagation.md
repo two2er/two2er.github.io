@@ -132,41 +132,57 @@ A simple neural network with mini-batch Back Propagation was implemented and sha
 ## Back Propagation Through Time (BPTT)
 
 The Back Propagation Through Time is an application of Back Propagation to sequence models with hidden states, like RNN. A RNN receives the input $X_t\in\mathbb{R}^{n\times d_x}$ at the $t$-th time step, linearly combining it with the hidden state $h_{t-1}$ and applying an activation function:
+
 $$
 h_t = \sigma(h_{t-1}W_{hh}+X_tW_{hx})\tag{13}
 $$
-where the hidden state $h$ is a matrix of shape $(n,d_h)$ ($d_h$ is the dimension of the hidden state), and $W_{hh}\in\mathbb{R}^{d_h\times d_h}$, $W_{xh}\in\mathbb{R}^{d_x,d_h}$ are weight matrices. Then, the network outputs according to the hidden state:
+
+where the hidden state $h$ is a matrix of shape $(n,d_h)$ ($d_h$ is the dimension of the hidden state), and $W_{hh}\in\mathbb{R}^{d_h\times d_h}$, $W_{xh}\in\mathbb{R}^{d_x\times d_h}$ are weight matrices. Then, the network outputs according to the hidden state:
+
 $$
 \hat{y}_t=softmax(h_tW_{hs})\tag{14}
 $$
+
 The shape of the weight matrix $W_{hs}$ is $(d_h,\|V\|)$, where $\|V\|$ is the number of classes (in a language model, it is the size of the vocabulary).
 
 Since the weight matrices are reused at each time steps, the updating method is different from that of a simple multi-layer neural network. Suppose the RNN is for word predicting tasks. Then, the loss function would be the sum of the discrepancies between the prediction $\hat{y}$ and the label $y$ at every time step:
+
 $$
 L = \sum_{t=1}^Tl(y_t,\hat{y}_t) = \sum_{t=1}^Tl_t\tag{15}
 $$
+
 The partial derivative of $l_t$ with respect to $W_{hh}$ or $W_{hx}$ could be calculated by the chain rule through the derivative with respect to $h$:
+
 $$
 \frac{\partial l_t}{\partial W}=\frac{\partial l_t}{\partial \hat{y}_t}\frac{\partial \hat{y}_t}{\partial h_t}\frac{\partial h_t}{\partial W}=\frac{\partial l_t}{\partial \hat{y}_t}\frac{\partial \hat{y}_t}{\partial h_t}\sum_{k=1}^t\frac{\partial h_t}{\partial h_k}\frac{\partial h_k}{\partial W}\tag{16}
 $$
+
 The $\frac{\partial h_t}{\partial h_k}$ is:
+
 $$
 \frac{\partial h_t}{\partial h_k}=\prod_{j=k+1}^t\frac{\partial h_j}{\partial h_{j-1}}\tag{17}
 $$
+
 from $(13)$, the partial derivative $\frac{\partial h_j}{\partial h_{j-1}}$ is:
+
 $$
 \frac{\partial h_j}{\partial h_{j-1}}=W_{hh}\odot\sigma'(h_{j-1}W_{hh}+X_jW_{hx})\tag{18}
 $$
+
 (since both $h_j$ and $h_{j-1}$ are matrices, the $n$ is set to $1$ for clarity)
 
 Substitute $(18)$ into $(17)$:
+
 $$
 \frac{\partial h_t}{\partial h_k}=W_{hh}^{t-k}\odot_{j=k+1}^t\sigma'(h_{j-1}W_{hh}+X_jW_{hx})\tag{19}
 $$
+
 From $\frac{\partial h_1}{\partial W}$ and $\frac{\partial h_t}{\partial W}=\sum_{k=1}^t\frac{\partial h_t}{\partial h_k}\frac{\partial h_k}{\partial W}$, we can calculate the $\frac{\partial h}{\partial W}$ for each time step. Then the results are substituted into $(16)$ , where we derive $\frac{\partial l_t}{\partial W}$. Finally, accumulate $l$ through the sequence:
+
 $$
 \frac{\partial L}{\partial W}=\sum_{t=1}^T\frac{\partial l_t}{\partial \hat{y}_t}\frac{\partial \hat{y}_t}{\partial h_t}\sum_{k=1}^t\left(\prod_{j=k+1}^t\frac{\partial h_j}{\partial h_{j-1}}\right)\frac{\partial h_k}{\partial W}\tag{20}
 $$
+
 This is the partial derivative for a weight matrix of the RNN.
 
 By the way, there is a term $W_{hh}^{t-k}$ in $\frac{\partial h_t}{\partial h_k}$, which is an exponent of the weight matrix. Pascanu et al showed in his paper that if the largest eigenvalue of $W_{hh}$ is less than 1, and $(t-k)$ is sufficiently large, the norm of the gradient will shrink exponentially (suppose the activation function is the sigmoid function). Conversely, if it is larger than 1, the norm will grow extremely large. Therefore, if the length of the sequence is too long, updating parameters of early time steps would have troubles, since the gradient is either too large or too small. These are called the *Gradient Vanishing* and the *Gradient Explosion* problems. Due to these facts, training RNNs are thought to be difficult. Many techniques are proposed to alleviate vanishing and explosion problems, like the Gradient Clipping. Normally, we can use activation function rather than sigmoid, like ReLU (Rectified Linear Units), or alter the network architecture to LSTM or GRU, to improve training efficiency. However, the gradient vanishing and gradient explosion problems could not be totally eliminated. Carefully selected hyperparameters and appropriate initialization are still vital.
