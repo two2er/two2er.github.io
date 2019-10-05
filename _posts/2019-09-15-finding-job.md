@@ -4,6 +4,8 @@ title: 找呀找呀找工作
 excerpt: "two2er为了找工作写的学习笔记，偶尔是日记。"
 categories: [Algorithm]
 comments: true
+image:
+  feature: job_cover.jpg
 ---
 
 ---
@@ -33,3 +35,4 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 最近又开了一个坑，改刷剑指offer了。题目来源为[牛客网66题](<https://www.nowcoder.com/ta/coding-interviews>)。其实两年前读本科到现在，我在LeetCode刷了400题左右。大部分因为没有笔记，当时的灵光一现早已被遗忘。现在我身处英国，读一个水硕，悔不当初。每天写博客记录自己的学习，多希望自己能如愿以偿，找到一个理想的工作。（2019.09.29）
 
 - [链表](/pages/jianzhi/2019-09-29-linkedlist)
+- [树](/pages/jianzhi/2019-09-30-tree)

@@ -4,8 +4,6 @@ title: Represent Words as Vectors
 excerpt: "A brief introduction to common word vector approaches."
 categories: [NLP]
 comments: true
-image:
-  feature: NLP_cover.jpg
 ---
 
 ---
