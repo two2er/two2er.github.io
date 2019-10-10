@@ -8,7 +8,7 @@ comments: true
 
 
 
-### Morris Traversal
+## Morris Traversal
 
 [参考文章](https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/)
 
@@ -51,7 +51,7 @@ def MorrisTraversal(root):
 
 
 
-### KMP算法
+## KMP算法
 
 [参考文章](https://www.geeksforgeeks.org/kmp-algorithm-for-pattern-searching/)
 
@@ -121,7 +121,7 @@ def computeLPSArray(p, M, lps):
 
 
 
-### Floyd-Warshall算法
+Floyd-Warshall算法
 
 **Floyd-Warshall算法**是一个动态规划的求最短路径的算法。和Dijkstra算法不同，它能求出所有顶点到所有顶点的最短距离，时间复杂度是`O(|V|^3)`，如果要用Dijkstra实现求所有顶点到所有顶点的最短路径，时间复杂度是`O(|E||V|^2)`（其中`|V|`是节点数，`|E|`是边数）。FW算法用`dist(i, j, k)`来表示，从节点`i`到节点`j`，经过编号为`1~k`的中间节点，能达到的最短路径长度。在已知所有`dist(·, ·, k-1)`的情况下，我们知道，节点`i`到`j`途径`1~k`号中间节点的最短路径有两种可能：
 
@@ -144,7 +144,7 @@ def floyd_warshall(V, E):
 
 
 
-### 最大流算法
+## 最大流算法
 
 （以下复制了一些在上本科离散数学课做的笔记）
 
@@ -233,7 +233,7 @@ def max_flow(node_num, edges):
 
 
 
-### 将2维动态规划转化为1维动态规划
+## 将2维动态规划转化为1维动态规划
 
 很多时候，2维动态规划（使用二维数组来存储中间计算值）都可以转成1维动态规划，1维动态规划可以转成常数空间复杂度。 这是因为计算`dp[i]`往往只依赖于`dp[:i]`（很多时候只依赖于`dp[i-1]`），所以用临时变量来存储上一步的结果就好了。2维动态规划转1维动态规划的也是同理，用一个一维数组来存储上一排中间计算值结果。一般来说，去掉`axis=0`那个维度比较简单。一般循环是
 
@@ -300,7 +300,7 @@ class Solution:
 
 
 
-### Counting Sort 
+## Counting Sort 
 
 [参考文章](https://www.geeksforgeeks.org/counting-sort/)
 
@@ -323,7 +323,7 @@ def countingsort(arr):
 
 
 
-### 并查集 union-find (disjoint-set)
+## 并查集 union-find (disjoint-set)
 
 **并查集**应该谁都知道吧……非常优美的算法。为记录而记录。
 

@@ -8,9 +8,9 @@ comments: true
 
 ---
 
-------
+---
 
-### 异或链表
+## 异或链表
 
 [维基百科]([https://zh.wikipedia.org/wiki/%E5%BC%82%E6%88%96%E9%93%BE%E8%A1%A8](https://zh.wikipedia.org/wiki/异或链表))
 
@@ -57,7 +57,7 @@ def heap_sort(arr):
 
 
 
-### Trie树
+## Trie树
 
 [维基百科](https://zh.wikipedia.org/wiki/Trie)
 
