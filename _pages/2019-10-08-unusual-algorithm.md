@@ -1,4 +1,3 @@
----
 layout: post
 title: 较不常见算法总结
 excerpt: "你听过但不熟的数据结构/算法。"
