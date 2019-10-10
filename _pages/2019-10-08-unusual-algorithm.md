@@ -1,11 +1,8 @@
----
 layout: post
 title: 较不常见算法总结
 excerpt: "你听过但不熟的数据结构/算法。"
 categories: [Algorithm]
 comments: true
-
----
 
 ---
 
@@ -61,7 +58,7 @@ def MorrisTraversal(root):
 著名的看毛片算法。**KMP算法**用来做子字符串匹配。具体地说，就是在一个字符串`s`中，找出所有与另一字符串`p`相等的子串。KMP算法能做到在`O(n)`时间复杂度里完成匹配。
 KMP算法先算一个跟`p`有关的`lps`数组（longest prefix, suffix），其中`lps[i]`是`p[:i+1]`的最长的共同前缀后缀子串的长度。如果有一个子字符串是`p[:i+1]`的前缀，同时也是后缀，那么它就称为共同前缀后缀子串（简称前后缀。前后缀不能是`p[:i+1]`本身，起码要比`p[:i+1]`少一个字符。比如`abcd`的前缀有`a, ab, abc`。）这个`lps`的好处是，当我们匹配时，`p[:i]`和`s[j:j+i]`都匹配上了，但是`p[i] != s[j+i]`，我们不必回到`s[j+1]`和`p[0]`那里重新匹配过，而是向前移动`i-lps[i-1]`距离:
 
-![KMP_1][https://two2er.github.io/img/unusual_algo/kmp_1.jpg]
+![KMP_1](https://two2er.github.io/img/unusual_algo/kmp_1.jpg)
 
 因为`p[:i]`中有长度为`lps[i-1]`的前后缀，所以移动距离`i-lps[i-1]`能让`p[:i]`再次匹配上`i-lps[i-1]`个字符。（注意，移动`p`其实是移动指针`j`。`p`首部和`s[j]`对齐）为什么是移动这么多距离，而不能是更少呢？因为移动更少距离，`p[:i]`没有机会和`s[j:]`匹配上。设想一下，如果真的匹配上了，`p[:i]`应该有一个更长的最长前后缀才对。在移动完`j`以后，`s[j:j+lps[i-1]]`跟`p[:lps[i-1]]`是匹配上的，下一步我们应该考虑`s[j+lps[i-1]]`是否等于`p[lps[i-1]]`，所以我们要把`p`的指针`i`移到`lps[i-1]`。
 
@@ -93,11 +90,11 @@ def KMPSearch(p, s):
 
 在求`lps`是也可以做优化。比方说，我们已经算出`p[:i]`的`lps`值是`len`，那么如果`p[len]==p[i]`，就能确定`lps[i] = len+1`。这看图很容易看出来。
 
-![KMP_2][https://two2er.github.io/img/unusual_algo/kmp_3.jpg]
+![KMP_2](https://two2er.github.io/img/unusual_algo/kmp_3.jpg)
 
 如果`p[len]!=p[i]`，说明`p[:i+1]`的最长前后缀的前缀（下面就简称最前缀和最后缀）不是`p[:len+1]`，而是包含在`p[:len]`里。我们用a b c d来标明`p`的最前缀和最后缀上的四个长度相等子串（可能是空串）。
 
-![KMP_3][https://two2er.github.io/img/unusual_algo/kmp_2.jpg]
+![KMP_3](https://two2er.github.io/img/unusual_algo/kmp_2.jpg)
 
 我们想找一个最长的a，来使得它后一个字符是`p[i]`，并且`a+p[i]`是`p[:i+1]`的最前缀。但是呢，a b和c d是在`p[:i]`的最前后缀中，所以有`a==c`和`b==d`。这样的话，a的长度就不能超过`p[:len]`的最前缀。否则，`a!=b` -> `a!=d` -> `a+p[i]!=d+p[i]`，这个`a+p[i]`就不是`p[:i+1]`的最前缀。因此，`a`被包含在`p[:len]`的最前缀中。因此，在计算`lps[i]`时，不用再考虑其最前缀长度大于`p[:len]`最前缀长度（即`lps[len-1]`）的情况。
 
@@ -159,7 +156,7 @@ def floyd_warshall(V, E):
 - N中的**流flow**是一个函数，使N中每条边`(i,j)`都指定一个不超过$C\_{ij}$的非负数$F\_{ij}$
 - 进入结点k的边上的$F\_{ik}$之和必须等于离开结点k的边上的$F\_{kj}$之和，这称为**流的守恒conservation of flow**。离开源的流之和等于进入汇的流之和，称为**流量value of flow**，记作value(F)。
 
-![flow_1][https://two2er.github.io/img/unusual_algo/flow_1.jpg]
+![flow_1](https://two2er.github.io/img/unusual_algo/flow_1.jpg)
 
 （两个数字是正负超容量）
 
@@ -175,7 +172,7 @@ def floyd_warshall(V, E):
 
 - N的**切割cut**定义为某些边的集合`K`，它的从源到汇的每条道路至少包含`K`中的一条边（就是说，一个切割把`N`分成两块，一块有源，一块有汇）。一个切割`K`的容量，即$c(K)$，是K中所有边的容量之和。
 
-![Screenshot from 2018-07-05 22-38-26.png-57.5kB][5]
+![flow_2](https://two2er.github.io/img/unusual_algo/flow_2.jpg)
 
 任意流F的$value(F)$总不大于任意切割的$c(K)$。
 

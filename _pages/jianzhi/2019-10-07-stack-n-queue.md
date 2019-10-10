@@ -117,7 +117,7 @@ class Solution:
         return sorted(tinput)[:k]
 ```
 
-不过这并不是最好的做法。这道题更适合用最小堆来解决。
+或者也可以用堆来做。
 
 ```python
 import heapq
