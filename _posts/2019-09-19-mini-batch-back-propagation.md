@@ -8,19 +8,19 @@ comments: true
 
 ## Introduction
 
-Months ago, I learned Back Propagation from this an outstanding [tutorial](http://neuralnetworksanddeeplearning.com/chap2.html) of neural network. Currently, I am studying [CS224N](<https://web.stanford.edu/class/cs224n/>), which reviews me some details of the BP algorithm. In this article, the [tutorial](<http://neuralnetworksanddeeplearning.com/chap2.html>) would be summarized, but in mini-batch style by stacking single input sample vectors to be an input matrix. Then, the Back Propagation Through Time (BPTT) would be introduced (additional part).
+Months ago, I learned Back Propagation from this an outstanding [tutorial](http://neuralnetworksanddeeplearning.com/chap2.html) of neural network. Currently, I am studying [CS224N](<https://web.stanford.edu/class/cs224n/>), which reviews some details of the BP algorithm. In this article, the [tutorial](<http://neuralnetworksanddeeplearning.com/chap2.html>) would be summarized, but in mini-batch style by stacking single input sample vectors to be an input matrix. The Back Propagation Through Time (BPTT) would also be introduced (additional part).
 
 ## Mini-Batch BP
 
-Though column vectors are more common, in this article, row vectors are preferred because conventionally the first dimension of input tensors denotes `batch-size`. For example, if we want to input 5 images, whose height and width are 10, and channel is 3, we would construct an input tensor of shape `(5, 10, 10, 3)` or `(5, 3, 10, 10)` to feed our model. It would be more convenient to implement the algorithm if using row vectors. Therefore, the input matrix could be denoted as $X\in\mathbf{R}^{m\times d}$, where $m$ is the batch size, and the $d$ is the dimension of sample vectors.
+Though column vectors are more common, in this article, row vectors are preferred because conventionally the first dimension of input tensors denotes `batch-size`. For example, if we want to input 5 images, whose height and width are 10, and the number of channels is 3, we would construct an input tensor of shape `(5, 10, 10, 3)` or `(5, 3, 10, 10)` to feed our model. It would be more convenient to implement the algorithm if using row vectors. Therefore, the input matrix could be denoted as $X\in\mathbf{R}^{m\times d}$, where $m$ is the batch size, and the $d$ is the dimension of sample vectors.
 
-Given a neural network, suppose it has $L$ layers. In  the forward propagation process of the $l$-th layer, neurons receive activated outputs $A^{l-1}$ from the $(l-1)$-th layer, and do linear transformation:
+Given a neural network, suppose it has $L$ layers. In  the forward propagation process of the $l^th$ layer, neurons receive activated outputs $A^{l-1}$ from the $(l-1)^th$ layer, and do linear transformation:
 
 $$
 Z^l=A^{l-1}W^l+b^l\tag{1}
 $$
 
-where the $W^l$ is the weight matrix of edges connecting neurons on the $(l-1)$-th layer and the $l$-th layer, and the $b^l$ is their bias vector. The shape of $A^{l-1}$ is $(m,n^{l-1})$, where $n^{l-1}$ is the number of neurons in the $(l-1)$-th layer. The shape of $W^l$ is $(n^{l-1},n^l)$, where $W_{ij}^l$ is the weight of the edge connecting the $i$-th neuron of the $(l-1)$-th layer and the $j$-th neuron of the $l$-th layer. The shape of $b^l$ is $(1,n^l)$, and the addition between $A^{l-1}W^l$ and $b^l$ is similar to "broadcasting" in Numpy. $b^l$ would be added to each row of $A^{l-1}W^l$.
+where the $W^l$ is the weight matrix of edges connecting neurons on the $(l-1)^th$ layer and the $l^th$ layer, and the $b^l$ is their bias vector. The shape of $A^{l-1}$ is $(m,n^{l-1})$, where $n^{l-1}$ is the number of neurons in the $(l-1)^th$ layer. The shape of $W^l$ is $(n^{l-1},n^l)$, where $W_{ij}^l$ is the weight of the edge connecting the $i^th$ neuron of the $(l-1)^th$ layer and the $j^th$ neuron of the $l^th$ layer. The shape of $b^l$ is $(1,n^l)$, and the addition between $A^{l-1}W^l$ and $b^l$ is similar to "broadcasting" in Numpy. $b^l$ would be added to each row of $A^{l-1}W^l$.
 
 After the linear transformation, we apply the activation function to $Z^l$, which is denoted as $\sigma$:
 
@@ -30,7 +30,7 @@ $$
 
 The activation function is element-wise.
 
-After propagating the signals to the last layer, we get the output of the network: $A^L\in\mathbf{R}^{m\times n^L}$. Then we can compute the loss of this batch: $C$ (for the sake of simplicity, the network only predicts one target, so the $C$ is a scalar). The partial derivative of $C$ with respect to $A^L$ is easy to compute, since $C$ is directly computed from $A^L$ and labels. According to the chain rule, the derivative with respect to $Z^L$ is:
+After propagating the signals to the last layer, we get the output of the network: $A^L\in\mathbf{R}^{m\times n^L}$. Then we can compute the loss of this batch: $C$ (for the sake of simplicity, the network only predicts one target, so the $C$ is a scalar). The partial derivative of $C$ with respect to $A^L$ is easy to compute since $C$ is directly computed from $A^L$ and labels. According to the chain rule, the derivative with respect to $Z^L$ is:
 
 $$
 \frac{\partial C}{\partial Z^L}=\frac{\partial C}{\partial A^L}\frac{\partial A^L}{\partial Z^L}=\frac{\partial C}{\partial A^L}\odot\sigma'(Z^L)\tag{3}
@@ -38,9 +38,9 @@ $$
 
 (note that the shapes of $\frac{\partial C}{\partial Z^L}$ and $\frac{\partial C}{\partial A^L}$ are all $(m,n^L)$, which follow the [denominator layout](<https://en.wikipedia.org/wiki/Matrix_calculus#Layout_conventions>). just for implementation convenience)
 
-If you can not figure out why timing $\frac{\partial A^L}{\partial Z^L}$ is equivalent to multiplying $\sigma'(Z^L)$ element-wisely, try to compute the partial derivatives of every element in $Z^L$ and compare them with $(3)$. We denote the $\frac{\partial C}{\partial Z^L}$ as $\delta^L$, or call it the "error" of the $L$-th layer. The notation $\delta$ significantly simplifies the formulas of Back Propagation, though it has no special meaning in itself.
+If you can not figure out why timing $\frac{\partial A^L}{\partial Z^L}$ is equivalent to multiplying $\sigma'(Z^L)$ element-wisely, try to compute the partial derivatives of every element in $Z^L$ and compare them with $(3)$. We denote the $\frac{\partial C}{\partial Z^L}$ as $\delta^L$ or call it the "error" of the $L^th$ layer. The notation $\delta$ significantly simplifies the formulas of Back Propagation, though it has no special meaning in itself.
 
-Since we are doing mini-batch training, the $i$-th row of $Z^{l+1}$ is only dependent to the $i$-th row of $Z^l$. By the chain rule, elements in $\delta^l$ are equal to:
+Since we are doing mini-batch training, the $i^th$ row of $Z^{l+1}$ is only dependent to the $i^th$ row of $Z^l$. By the chain rule, elements in $\delta^l$ are equal to:
 
 $$
 \delta_{ij}^l=\frac{\partial C}{\partial Z_{ij}^l}=\sum_k\frac{\partial C}{\partial Z_{ik}^{l+1}}\frac{\partial Z_{ik}^{l+1}}{\partial Z_{ij}^l}=\sum_k\delta_{ik}^{l+1}\frac{\partial Z_{ik}^{l+1}}{\partial Z_{ij}^l}\tag{4}
@@ -98,7 +98,7 @@ $$
 \frac{\partial C}{\partial b^l}=\sum_k\delta_{k,\cdot}^l\tag{12}
 $$
 
-In this way, we finally get derivatives of parameters of each layer, and update them by gradient descent.
+In this way, we finally get derivatives of parameters of each layer and update them by gradient descent.
 
 In summary, the process of Back Propagation is as following:
 
@@ -131,7 +131,7 @@ A simple neural network with mini-batch Back Propagation was implemented and sha
 
 ## Back Propagation Through Time (BPTT)
 
-The Back Propagation Through Time is an application of Back Propagation to sequence models with hidden states, like RNN. A RNN receives the input $X_t\in\mathbb{R}^{n\times d_x}$ at the $t$-th time step, linearly combining it with the hidden state $h_{t-1}$ and applying an activation function:
+The Back Propagation Through Time is an application of Back Propagation to sequence models with hidden states, like RNN. A RNN receives the input $X_t\in\mathbb{R}^{n\times d_x}$ at the $t^th$ time step, linearly combining it with the hidden state $h_{t-1}$ and applying an activation function:
 
 $$
 h_t = \sigma(h_{t-1}W_{hh}+X_tW_{hx})\tag{13}
@@ -145,7 +145,7 @@ $$
 
 The shape of the weight matrix $W_{hs}$ is $(d_h,\|V\|)$, where $\|V\|$ is the number of classes (in a language model, it is the size of the vocabulary).
 
-Since the weight matrices are reused at each time steps, the updating method is different from that of a simple multi-layer neural network. Suppose the RNN is for word predicting tasks. Then, the loss function would be the sum of the discrepancies between the prediction $\hat{y}$ and the label $y$ at every time step:
+Since the weight matrices are reused at each time step, the updating method is different from that of a simple multi-layer neural network. Suppose the RNN is for word predicting tasks. Then, the loss function would be the sum of the discrepancies between the prediction $\hat{y}$ and the label $y$ at every time step:
 
 $$
 L = \sum_{t=1}^Tl(y_t,\hat{y}_t) = \sum_{t=1}^Tl_t\tag{15}
@@ -183,9 +183,9 @@ $$
 \frac{\partial L}{\partial W}=\sum_{t=1}^T\frac{\partial l_t}{\partial \hat{y}_t}\frac{\partial \hat{y}_t}{\partial h_t}\sum_{k=1}^t\left(\prod_{j=k+1}^t\frac{\partial h_j}{\partial h_{j-1}}\right)\frac{\partial h_k}{\partial W}\tag{20}
 $$
 
-This is the partial derivative for a weight matrix of the RNN.
+This is the partial derivative of a weight matrix of the RNN.
 
-By the way, there is a term $W_{hh}^{t-k}$ in $\frac{\partial h_t}{\partial h_k}$, which is an exponent of the weight matrix. Pascanu et al showed in his paper that if the largest eigenvalue of $W_{hh}$ is less than 1, and $(t-k)$ is sufficiently large, the norm of the gradient will shrink exponentially (suppose the activation function is the sigmoid function). Conversely, if it is larger than 1, the norm will grow extremely large. Therefore, if the length of the sequence is too long, updating parameters of early time steps would have troubles, since the gradient is either too large or too small. These are called the *Gradient Vanishing* and the *Gradient Explosion* problems. Due to these facts, training RNNs are thought to be difficult. Many techniques are proposed to alleviate vanishing and explosion problems, like the Gradient Clipping. Normally, we can use activation function rather than sigmoid, like ReLU (Rectified Linear Units), or alter the network architecture to LSTM or GRU, to improve training efficiency. However, the gradient vanishing and gradient explosion problems could not be totally eliminated. Carefully selected hyperparameters and appropriate initialization are still vital.
+By the way, there is a term $W_{hh}^{t-k}$ in $\frac{\partial h_t}{\partial h_k}$, which is an exponent of the weight matrix. Pascanu et al showed in his paper that if the largest eigenvalue of $W_{hh}$ is less than 1, and $(t-k)$ is sufficiently large, the norm of the gradient will shrink exponentially (suppose the activation function is the sigmoid function). Conversely, if it is larger than 1, the norm will grow extremely large. Therefore, if the length of the sequence is too long, updating parameters of early time steps would have troubles, since the gradient is either too large or too small. These are called the *Gradient Vanishing* and the *Gradient Explosion* problems. Due to these facts, training RNNs are thought to be difficult. Many techniques are proposed to alleviate vanishing and explosion problems, like the Gradient Clipping. Normally, we can use activation function rather than sigmoid, like ReLU (Rectified Linear Units), or alter the network architecture to LSTM or GRU, to improve training efficiency. However, the gradient vanishing and gradient explosion problems could not be eliminated. Carefully selected hyperparameters and appropriate initialization are still vital.
 
 
 

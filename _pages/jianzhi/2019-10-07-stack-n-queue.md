@@ -103,43 +103,6 @@ def IsPopOrder(self, pushV, popV):
 
 
 
-## 29-最小的K个数
-
-> 输入n个整数，找出其中最小的K个数。例如输入4,5,1,6,2,7,3,8这8个数字，则最小的4个数字是1,2,3,4,。
-
-这道题使用Python，可以很方便地一行解决（不过由于牛客网无聊的测试用例加到了三行啦……）：
-
-```python
-class Solution:
-    def GetLeastNumbers_Solution(self, tinput, k):
-        if len(tinput) < k:
-            return []
-        return sorted(tinput)[:k]
-```
-
-或者也可以用堆来做。
-
-```python
-import heapq
-class Solution:
-    def GetLeastNumbers_Solution(self, tinput, k):
-        if len(tinput) < k:
-            return []
-        heap = []
-        for each in tinput:
-            heapq.heappush(heap, each)
-        rtn = []
-        for _ in range(k):
-            rtn.append(heapq.heappop(heap))
-        return rtn
-```
-
-
-
----
-
-
-
 ## 44-翻转单词顺序列
 
 > 将一个句子中的单词翻转顺序。例如，“student. a am I”变成“I am a student.”。
