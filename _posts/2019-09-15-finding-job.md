@@ -37,8 +37,9 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 
 - [链表](/pages/jianzhi/2019-09-29-linkedlist)
 - [树](/pages/jianzhi/2019-09-30-tree)
-- [栈&队列](/pages/jianzhi/2019-09-30-stack-n-queue)
-- [堆&哈希表&图](/pages/jianzhi/2019-10-11-heap-hash-graph)
+- [数据结构](/pages/jianzhi/2019-09-30-stack-n-queue)
+- [递归](/pages/jianzhi/2019-10-11-recursive)
+- [动态规划](2019-10-12-dynamic-programming)
 - to be continued...
 
 ---

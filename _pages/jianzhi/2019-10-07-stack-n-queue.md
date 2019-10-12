@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 剑指offer-栈&队列
-excerpt: "剑指offer问题的解答：栈&队列"
+title: 剑指offer-数据结构
+excerpt: "剑指offer问题的解答：数据结构"
 categories: [Algorithm]
 comments: true
 ---
@@ -149,5 +149,68 @@ class Solution:
             if i >= size - 1:
                 rtn.append(window[1])
         return rtn
+```
+
+
+
+---
+
+
+
+## 29-最小的K个数
+
+> 输入n个整数，找出其中最小的K个数。例如输入4,5,1,6,2,7,3,8这8个数字，则最小的4个数字是1,2,3,4,。
+
+这道题使用Python，可以很方便地一行解决（不过由于牛客网无聊的测试用例加到了三行啦……）：
+
+```python
+class Solution:
+    def GetLeastNumbers_Solution(self, tinput, k):
+        if len(tinput) < k:
+            return []
+        return sorted(tinput)[:k]
+```
+
+或者也可以用堆来做。
+
+```python
+import heapq
+class Solution:
+    def GetLeastNumbers_Solution(self, tinput, k):
+        if len(tinput) < k:
+            return []
+        heap = []
+        for each in tinput:
+            heapq.heappush(heap, each)
+        rtn = []
+        for _ in range(k):
+            rtn.append(heapq.heappop(heap))
+        return rtn
+```
+
+
+
+------
+
+
+
+## 34-第一个只出现一次的字符
+
+> 在一个字符串(0<=字符串长度<=10000，全部由字母组成)中找到第一个只出现一次的字符,并返回它的位置, 如果没有则返回 -1（需要区分大小写）.
+
+这道题可以使用一个哈希表来存储出现过的字符第一次出现的位置。由于题目的字符串只有'a-zA-Z' 52个大小写字母，所以用一个长度为52的一维数组就可以了。数组初始化为-1，每碰到一个字符串的单词，就将其记录到对应位置上；如果字符对应位置之前有记录过的话，说明该字符之前在字符串中已经出现过，便将其设为-2。
+
+```python
+def FirstNotRepeatingChar(self, s):
+	if not s:
+	    return -1
+	place = [-1] * 52
+	for i, c in enumerate(s):
+	    idx = ord(c)-97 if 'a' <= c else ord(c) - 65 + 26
+	    if place[idx] == -1:
+	        place[idx] = i
+	    else:
+	        place[idx] = -2
+	return min([p for p in place if p >= 0])
 ```
 
