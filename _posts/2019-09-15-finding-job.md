@@ -41,6 +41,7 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 - [递归](/pages/jianzhi/2019-10-11-recursive)
 - [动态规划](/pages/jianzhi/2019-10-12-dynamic-programming)
 - [二分查找](/pages/jianzhi/2019-10-12-binary-search)
+- [位运算](/pages/jianzhi/2019-10-13-bitwise)
 - to be continued...
 
 ---
