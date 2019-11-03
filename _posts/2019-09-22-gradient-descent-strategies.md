@@ -8,11 +8,11 @@ comments: true
 
 ## Defect of Traditional Gradient Descent
 
-Everyone might know something about the gradient descent (GD), which is one of the basic techniques of machine learning. GD is an iteration-based parameter optimizing method. At each iteration, it firstly calculates the partial derivative of the loss function $J$ with respect to each parameter $c$, and then updates $c$ by:
+Everyone might know something about the Gradient Descent (GD), which is one of the basic techniques of machine learning. GD is an iteration-based parameter optimizing method. At each iteration, it first calculates the partial derivative of the loss function $J$ with respect to each parameter $c$, and then updates $c$ by:
 
 $$c\leftarrow c-\eta \nabla_c$$
 
-where the $\eta$ is the learning rate, or the step size. Though simple, GD has some disadvantages to be improve:
+where the $\eta$ is the learning rate, or the step size. Though simple, GD has some disadvantages to be improved:
 
 - If the parameters are not normalized before training, it is likely to slow down the speed of convergence. The reason is that the learning rates for each parameter are the same. If a parameter is much greater than another parameter, it might get a larger gradient and overshoot. As well, the path to the minimum would oscillate:
 
@@ -20,11 +20,11 @@ where the $\eta$ is the learning rate, or the step size. Though simple, GD has s
 
   All these will increase the difficulty of training. A simple solution is to set a relatively small learning rate for the model, but it would slow down the training process, which is also not what we expect.
 
-- Since the learning rate is invariable, after some iterations, the parameters would reach their minimum. However, if the learning rate is too large, the parameters might "skip" the minimum, and fail to converge.
+- Since the learning rate is invariable, after some iterations, the parameters would reach their minimum. However, if the learning rate is too large, the parameters might "skip" the minimum and fail to converge.
 
   ![overshooting](https://two2er.github.io/img/gradient_descent_strategies/overshooting.jpg)
 
-To improve these, some parameter optimization algorithms have been proposed. In this article, 5 ideas to improve GD would be introduced. They are: Momentum, Adagrad, RMSProp, Adadelta, and Adam. They are all based on GD, and are still iteration-based, but with some modifications on hyperparameters.
+Some parameter optimization algorithms have been proposed to improve these problems. In this article, five ideas to improve GD would be introduced. They are Momentum, Adagrad, RMSProp, Adadelta, and Adam. They are all based on GD, and are still iteration-based, but with some modifications on hyperparameters.
 
 **Gradient Descent**:
 
@@ -39,7 +39,7 @@ $$
 
 The process of GD, especially stochastic gradient descent (SGD) and mini-batch stochastic gradient descent, usually oscillates, resulting in a "winding" path to the minimum.
 
-We denote the updating values for a parameter (omitting the learning rate and the negative sign) at the $n$-th iteration as $v_n$:
+We denote the updating values for a parameter (omitting the learning rate and the negative sign) at the $n^th$ iteration as $v_n$:
 
 $$c\leftarrow c-\eta v_n$$
 
@@ -59,9 +59,9 @@ According to the last equation, $v_n$ is the weighted average of $\nabla_1,\nabl
 
 ![momentum](https://two2er.github.io/img/gradient_descent_strategies/momentum.jpg)
 
-On the other hand, we can imagine the $v$ as the "velocity" of the descendent path. It seems that the $\nabla_n$ for the $v_n$ at the $n$-th iteration is its "accelaration", and $v_{n-1}$ is its current velocity. This simulation to physical motion gives gradient descent the "inertia", and therefore the direction of the gradient varies less. This can help to avoid problems like oscillation and overshooting.
+On the other hand, we can imagine the $v$ as the "velocity" of the descendent path. It seems that the $\nabla_n$ for the $v_n$ at the $n^th$ iteration is its "acceleration", and $v_{n-1}$ is its current velocity. This simulation to physical motion gives gradient descent the "inertia", and therefore the direction of the gradient varies less. This can help to avoid problems like oscillation and overshooting.
 
-By the way, note that $\frac{1}{1-\beta}\sum_{i=1}^n\beta^{n-i}=1-\beta^n$. Therefore, the sum of weights is approximately equal to 1 when $n$ is big enough. Some versions of Momentum implementation do not have the normalized item $\frac{1}{1-\beta}$, because after some iterations, its effect to magnify gradients would be smaller and smaller, so it can be omitted reasonably.
+By the way, note that $\frac{1}{1-\beta}\sum_{i=1}^n\beta^{n-i}=1-\beta^n$. Therefore, the sum of weights is approximately equal to 1 when $n$ is big enough. Some versions of Momentum implementation do not have the normalized item $\frac{1}{1-\beta}$, because, after some iterations, its effect of magnifying gradients would be smaller and smaller, so it can be omitted reasonably.
 
 **Momentum**:
 
@@ -75,15 +75,15 @@ $$
 
 ## Adagrad
 
-To solve the problem caused by fixed learning rate, one very intuitive solution might be altering the learning rate during the process of gradient descent. Also intuitively, the learning rate is expected to decrease during the process. If the gradient is too large, the learning rate has to be dropped significantly to ensure the updating value is under control. So, one way to gradually reduce the learning rate is by dividing a variable:
+To solve the problem caused by the fixed learning rate, one very intuitive solution might be altering the learning rate during the process of gradient descent. Also, intuitively, the learning rate is expected to decrease during the process. If the gradient is too large, the learning rate has to be dropped significantly to ensure the updating value is under control. So, one way to gradually reduce the learning rate is by dividing a variable:
 
 $$\begin{aligned}s_n&\leftarrow s_{n-1}+\nabla_n^2\\c\leftarrow &c-\frac{\eta}{\sqrt{s_n+\epsilon}}\nabla_n\end{aligned}$$
 
-where the $\epsilon$ is a small constant value for numerical stability. At each iteration, the $s_n$ is added to the square of the gradient, so the denominator of the learning rate increases, keeping reducing the learning rate. If the parameter has a constant and large partial derivative, the learning rate would drop faster for this parameter, while if the gradient of the parameter remains small, its learning rate would decline more slowly. This prevents the model from overshooting while keeping a fast learning speed. The trick is called **adaptive learning rate**, which is the core idea of **Adagrad**. However, the Adagrad still has some problems. Since the $s_n$ is an accumulation of $\nabla_1$ to $\nabla_n$, at later stages of iteration the learning rate would become too small for updating, and the descendent path just likes getting "stuck" at the point.
+where the $\epsilon$ is a small constant value for numerical stability. At each iteration, the $s_n$ is added to the square of the gradient, so the denominator of the learning rate increases, keeping reducing the learning rate. If the parameter has a constant and large partial derivative, the learning rate will drop faster for this parameter, while if the gradient of the parameter remains small, its learning rate will decline more slowly. This prevents the model from overshooting while keeping a fast learning speed. The trick is called **adaptive learning rate**, which is the core idea of **Adagrad**. However, Adagrad still has some problems. Since the $s_n$ is an accumulation of $\nabla_1$ to $\nabla_n$, at later stages of iteration, the learning rate would become too small for updating, and the descendent path seems like getting "stuck" at the point.
 
 ![adagrad](https://two2er.github.io/img/gradient_descent_strategies/adagrad.jpg)
 
-This is due to the unreasonable design of $s$. The next step to perfect the gradient descent, would be finding a more reliable $s$, which could get rid of the problem of learning rate disappearing. 
+This is due to the unreasonable design of $s$. The next step to perfect the Gradient Descent would be finding a more reliable $s$, which could get rid of the problem of learning rate disappearing. 
 
 **Adagrad**:
 
@@ -98,7 +98,7 @@ Why not combine the idea of Momentum with the adaptive learning rate together? B
 
 $$s_n\leftarrow \gamma s_{n-1}+(1-\gamma)\nabla_n^2$$
 
-where $\gamma$ is similar to the $\beta$, a constant value between 0 and 1. As discussed before, the sum of weights is $1-\gamma^n$, so the $s_n$ could not be a too large number to invalidate the learning rate. Even after iterations of gradient descent, the model still remains the power to go forward, and finally reaches to the minimum.
+where $\gamma$ is similar to the $\beta$, a constant value between 0 and 1. As discussed before, the sum of weights is $1-\gamma^n$, so the $s_n$ could not be a too large number to invalidate the learning rate. Even after iterations of gradient descent, the model remains the power to go forward, and finally reaches to the minimum.
 
 ![rmsprop](https://two2er.github.io/img/gradient_descent_strategies/rmsprop.jpg)
 
@@ -135,7 +135,7 @@ $$
 c\leftarrow c-\nabla_n'
 $$
 
-One of the advantages of the Adadelta is that users do not need to tune the learning rate hyperparameter any more. At early stages of gradient descent, the gradient is relatively large, and taking larger updating steps by using greater learning rate is preferred. On the contrast, at later stages, the model is close to the minimum, the gradient is not as large as before, and it is better to take smaller steps to approach the minimum. The Adadelta algorithm performs well, and is robust during the training process.
+One of the advantages of the Adadelta is that users do not need to tune the learning rate hyperparameter any more. At the early stages of gradient descent, the gradient is relatively large, and taking larger updating steps by using a greater learning rate is preferred. On contrast, at later stages, the model is close to the minimum, the gradient is not as large as before, and it is better to take smaller steps to approach the minimum. The Adadelta algorithm performs well and is robust during the training process.
 
 **Adadelta**:
 
@@ -157,13 +157,13 @@ $$
 \hat{v}_n\leftarrow \frac{v_n}{1-\beta^n}
 $$
 
- After rescaling, the sum of weights becomes 1, which would ensure the model to be trained at a fast speed during early stages. This trick is called **bias correction**, which is the main idea of the **Adam**. Adam combines the momentum, adaptive learning rate and bias correction together. It also corrects the bias of the item $s$:
+ After rescaling, the sum of weights becomes 1, which would ensure the model to be trained at a fast speed during the early stages. This trick is called **bias correction**, which is the main idea of the **Adam**. Adam combines the momentum, adaptive learning rate, and bias correction. It also corrects the bias of the item $s$:
 
 $$
 \hat{s}_n\leftarrow \frac{s_n}{1-\gamma^n}
 $$
 
-The Adam could train models both fast and stably. It performs well, and is chosen by many users to optimize parameters.
+Adam could train models both fast and stable. It performs well and is chosen by many users to optimize parameters.
 
 **Adam**:
 
