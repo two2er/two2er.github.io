@@ -17,6 +17,7 @@ image:
 - [递归](/pages/LeetCode/2019-09-15-recursion)
 - [动态规划](/pages/LeetCode/2019-09-15-DP)
 - [贪心算法](/pages/LeetCode/2019-09-17-greedy)
+- [链表](/pages/LeetCode/2019-11-16-linkedlist)
 - to be continued...
 
 ---
