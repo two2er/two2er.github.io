@@ -119,5 +119,8 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 
 ---
 
+## 读书笔记
 
+- [C++ Primer思维导图](https://github.com/two2er/two2er.github.io/tree/master/rsc/CppPrimer)
+- [Effective C++](/pages/book/2019-12-28-effectiveCpp)
 
