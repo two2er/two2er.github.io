@@ -6,7 +6,7 @@ categories: [book]
 comments: true
 ---
 
-## 
+
 
 ## 让自己习惯C++
 
@@ -19,7 +19,7 @@ C++是多重范型编程语言（multiparadigm programming language），最好�
 ### 条款2：尽量以const、enum、inline替换#define
 
 “宁可以编译器替换预处理器”。
-```C
+```c
 #define ASPECT_RATIO 1.653
 // ASPECT_RATIO名字不在记号表内，难以追踪、debug ->
 const double ASPECT_RATIO = 1.653
@@ -53,7 +53,7 @@ inline void callWithMax(const T& a, const T& b) {
 ### 条款4：确定对象使用前已先被初始化
 
 程序库代码：
-```
+```c
 class FileSystem {
 public:
     ...
@@ -65,7 +65,7 @@ public:
 extern FileSystem tfs; 
 ```
 客户建立的代码：
-```
+```c
 class Directory {
 public:
     Directory( params );
@@ -80,7 +80,7 @@ Directory::Directory( params ) {
 Directory tempDir( params );
 ```
 是`tfs`先被初始化，还是`tempDir`先被初始化，无法确定。要用reference-returning模式：
-```
+```c
 class FileSystem {
 public:
     ...
@@ -117,7 +117,7 @@ C++11允许我们定义成员函数为`=delete`来阻止编译器自动生成它
 ### 条款7：为多态基类声明virtual析构函数
 
 如果你想要一个abstract class, 但实现的成员函数没有可以设成pure virtual的，不妨把析构函数设成pure virtual。不过这样就必须为析构函数提供一个定义：
-```
+```c
 AWOV::~AWOV() {}
 ```
 
@@ -300,6 +300,53 @@ void clearBrowser(WebBrowser& wb) {
 
 ### 条款25：考虑写出一个不抛出异常的swap函数
 
+缺省的`std::swap`实现用临时变量交换两个变量。这种方法效率不高。为了提高效率，可将自定义类以“pimpl手法”（pointer to implementation）设计（见条款31）。这种类在交换时只需要交换实现指针即可。我们希望为自定义类`Widget`做一个`std::swap`的全特化：
+
+```c
+namespace std {
+    template <>
+    void swap<Widget>(Widget &a, Widget &b) {
+        swap(a.pImpl, b.pImbl);
+    }
+}
+```
+
+pimpl类的实现指针一般是private的，所以可以为类添加一个public的swap成员函数，再让全特化版本调用这个swap成员函数。如果类是模板类，那么根据此思路，应该对`std::swap`进行偏特化：
+
+```c
+namespace std {
+    template <typename T>
+    void swap<Widget<T>>(Widget<T> &a, Widget<T> &b) {
+        a.swap(b);
+    }
+}
+```
+
+然而，C++不允许偏特化函数模板，只能偏特化类模板。因此，我们可以改为重载之：
+
+```c
+namespace std {
+    template <typename T>
+    void swap(Widget<T> &a, Widget<T> &b) {
+        a.swap(b);
+    }
+}
+```
+
+但是，std只允许客户全特化其中的模板，但不允许添加新的模板和类、函数及其他东西。违背这点的程序仍可以编译和运行，但是行为没有定义。因此，我们只能在自定义命名空间中声明非成员函数swap。这个swap所在命名空间和`std::swap`不同，因此在对类对象进行swap操作时，可以：
+
+```c
+using std::swap;
+swap(obj1, obj2);
+```
+在自定义swap找不到时，便使用`std::swap`（假设它比自定义版本匹配优先级低）。
+
+> 当std::swap对你的类型效率不高时，提供一个swap成员函数，并确定这个函数不抛出异常。
+
+> 如果你提供一个swap成员函数，也该提供一个非成员函数来调用前者。对于类（而非模板），也请特化std::swap。
+
+> 为“用户定义类型”进行std模板全特化是好的，但千万不要尝试在std内加入某些对std而言全新的东西。
+
 ## 实现
 
 ### 条款26：尽可能延后变量定义式的出现时间
@@ -335,7 +382,8 @@ class Derived: public Base {
 
 Derived d;
 d.func();
-// 10. 如果Derived类也有一个void func() {cout << v << endl;}，那么会输出20。派生类向基类的转换是很容易出错的。
+// 10. 如果Derived类也有一个void func() {cout << v << endl;}，
+// 那么会输出20。派生类向基类的转换是很容易出错的。
 d.f2();
 // 10
 ```
@@ -380,3 +428,572 @@ copy and swap策略能提供强烈保证。首先为打算修改的对象做一�
 > 将大多数inline限制在小型、被频繁调用的函数身上。这可使日后的调试过程和二进制升级（binary upgradability，指重新连接）更容易，也可使潜在的代码膨胀问题最小化，使程序的速度提升机会最大化。
 
 > 不要只因为函数模板出现在头文件，就将它们声明为inline。
+
+### 条款31：将文件间的编译依存关系降至最低
+
+pimpl（pointer to implementation）idiom设计把类分割为两个类，一个只提供接口（handle class），另一个负责实现该接口，“接口与实现分离”。
+```c
+class Person {
+public:
+    Person(...) {...}
+    string name() const;
+    // 客户接口。通过指针调用
+private:
+    shared_ptr<PersonImpl> pImpl;
+    // 指向实现对象。实现逻辑在PersonImpl类中
+};
+```
+在`Person`类的实现修改后，使用类对象的客户代码是不需要重新编译的。如果不进行分割，对`Person`类的修改会导致客户代码重新编译。这种handle class的方法可以解除接口和实现之间的耦合关系，interface class同样也可以。定义抽象基类（接口类），然后在派生类上实现之。客户通过基类指针调用类成员函数。这个分离的关键在于以“声明的依存性”替换“定义的依存性”。下面头文件中，不需类的定义：
+```c
+class Date;
+Date today();
+void clear(Date d);
+// 只需要Date类声明，并不需要定义
+```
+客户需要调用这些函数时才`#include``Date`类的定义，否则不需要`#include`。
+
+> 支持“编译依存性最小化”的一般构想是：相依于声明式，不要相依于定义式。基于此构想的两种手段是handle classes和interface class。
+
+> 程序头文件应该以“完全且仅由声明式”的形式存在。这种做法不论是否涉及模板都适用。
+
+## 继承与面向对象设计
+
+在OOP设计中，语法特性有其意义，表达了某种“意思”。
+
+### 条款32：确定你的public继承塑模出is-a关系
+
+类D public继承 类B，表达的意思是“类D is-a 类B”。B是比D更一般化的概念，而D比B更特殊化。在所有B对象可派上用场的地方，D对象一样可以（Liskov Substitution Principle）。任何期望接收类型为B的实参的函数，也愿意接受一个D实参。继承中的"is-a"，有时会反直觉。比如说企鹅"is-a"鸟，（大部分）鸟会飞，但企鹅不会飞的例子。我认为作者在分析public继承时用的企鹅和矩形的例子并不是逻辑严谨的。他认为增加矩形的宽度依然是矩形，而增加正方形的宽度就不再是正方形，以此例证public继承的反直觉。这是错的。正方形也具有“增加宽度后依然是矩形”的性质。我一直反感对“意义”的纠结。如果这种纠结无法提高开发效率，那么就是程序员的浪漫文学而已。
+
+> "public继承"意味is-a。适用于基类身上的每一件事情一定也适用于派生类上，因为每一个派生类对象也都是一个基类对象。
+
+### 条款33：避免遮掩继承而来的名称
+
+里层作用域的名字会遮掩掉外层作用域中所有相同的名字（例如所有同名重载函数）。通过`using Base::fuc`让基类名字重新可见。或者通过以下转交函数（forward function）：
+```c
+void fuc() { Base::fuc(); }
+```
+
+> 派生类内的名词会遮掩基类中的名称。在public继承下从来没有人希望如此。
+
+> 为了让被遮掩的名称重见天日，可使用using声明式或转角函数。
+
+### 条款34：区分接口继承和实现继承
+
+声明一个纯虚函数是为了让派生类只继承函数接口。派生类不对接口进行实现的便仍是抽象基类。声明一个普通纯虚数是为了让派生类继承该函数的接口和缺省实现。普通纯虚数的一个设计问题是派生类设计者可能会遗忘覆盖缺省实现，导致程序编译成功却行为异常。一种解决办法是将接口和缺省实现分离：
+
+```c
+struct Base {
+    virtual void func() = 0;
+    void defaultFunc() {...}
+};
+struct DerivedDefault {
+    void func() {defaultFunc();}
+};
+struct DerivedNotDefault { };
+// 遗忘覆盖将导致编译失败
+
+Base *ptr = new DerivedNotDefault;
+ptr->func();
+```
+
+如果基类的成员函数是非虚的，意味着它并不打算在派生类中有不同的行为。
+
+> 接口继承和实现继承不同。在public继承之下，派生类总是继承基类的接口。
+
+> 纯虚函数只具体指定接口继承。
+
+> 普通虚函数具体指定接口继承和缺省实现继承。
+
+> 非虚函数具体指定接口继承以及强制性实现继承。
+
+### 条款35：考虑virtual函数以外的其他选择
+
+non-virtual interface（NVI）手法是Template Method设计模式（和C++模板没有关系）的一个独特表现形式。它使用一个非虚函数——wrapper来包裹虚函数：
+```
+class Base {
+public:
+    void wrapper() {
+        ...             // 一些事前工作
+        doWrapper();    // 调用虚函数
+        ...             // 一些事后工作
+    }
+private:
+    virtual void doWrapper() {...};
+    // 派生类覆盖的虚函数。也可以不是private的
+};
+```
+
+NVI的优点是能在调用虚函数前后做一些通用性工作（比如上锁解锁……）。基类决定虚函数何时被调用，派生类决定虚函数的机能。
+
+另一种替代虚函数的设计模式是Strategy设计模式。类在初始化时接受一个函数指针，那个指针指向的函数便是它们的“虚函数”。这个方法的缺点是会降低类的封装性（可能要将函数声明为友元）。另外，初始化类对象的不一定要是函数指针，其他可调用对象也可以（类构造函数形参类型为function<> call signature）。在古典Strategy设计模式中，那些“虚函数”是另一些有继承关系的类的虚函数（这些类只负责像对象类提供这些“虚函数”，它们之间也用继承关系组织）。对象类只需要接受一个“虚函数”基类指针来构造即可。
+
+### 条款36：绝不重新定义继承而来的non-virtual函数
+
+非虚函数即使被指针调用，也是静态绑定的，只和指针类型有关。重新定义继承的非虚函数，行为不一致，意义不明，所以不应该这么做。
+
+### 条款37：绝不要重新定义继承而来的缺省参数值
+
+和非虚函数一样，缺省参数值也是静态绑定的。
+
+### 条款38：通过聚合塑模出has-a或is-implemented-in-terms-of
+
+程序中的对象可以分属于应用域（application domain，所塑造的“世界”中的某些事物）或实现域（implementation domain，实现细节用的对象，比如buffer、mutex）。如果聚合发生于应用域的对象之间，表现出has-a关系；如果发生于实现域内则表现is-implemented-in-terms-of关系。
+
+> 聚合的意义和public继承完全不同。
+
+> 在应用域，聚合意味着has-a。在实现域，聚合意味着is-implemented-in-terms-of。
+
+### 条款39：明智而审慎的使用private继承
+
+private继承让派生类对象无法自动转换为基类对象，且继承的成员（protected和public的）都变为private的。private继承意味着implemented-in-terms-of。private继承略去了接口，只继承了实现，派生类只为了采用基类已经实现了的某些特性，不一定和基类有什么意义上的联系。一般尽可能用聚合来实现implemented-in-terms-of。相比聚合，private继承允许派生类访问基类的protected对象，还能重新定义虚函数。private继承相比聚类，还有空白基类最优化（Empty base optimization，EBO）的优势。如下聚合类：
+```c
+class Empty {};     // 空类
+class Aggregate {
+    int x;
+    Empty e;
+};
+```
+`Empty`是个空类，按理来说不需占用内存。但C++规定凡是独立（非附属）对象必须具有非零大小（大部分编译器会插入一个char进空对象，让`sizeof(Empty)=1`），然后内存对齐又让`Aggregate`为`Empty`补位到int大小。如果是private继承：
+```c
+class PrivateInheritance: private Empty {
+    int x;
+};
+```
+几乎可以确定`sizeof(PrivateInheritance) == sizeof(int)`。这是EBO的效果（一般在单一继承下才可行）。
+
+> private继承意味着implemented-in-terms-of。它通常比聚合的级别低。但是当派生类需要访问protected基类成员时，或需要重新定义继承而来的虚函数时，这么设计是合理的。
+
+> 和聚合不同，private继承可以造成空白基类最优化。这对致力于“对象尺寸最小化”的程序库开发者而言，可能很重要。
+
+### 条款40：明智而审慎的使用多重继承
+
+## 模板与泛型编程
+
+### 条款41：了解隐式接口和编译期多态
+
+在面向对象编程中，显式接口（在类定义中声明的接口）和运行期多态很重要。但在泛型编程中，隐式接口（模板函数/类的表达式中对象调用的接口，比如`w.get()`说明`w`的类型`T`支持`get`接口）和编译期多态（以不同的模板参数实例化，会导致调用不同的类型成员函数）更重要。隐式接口返回类型模糊，比显式接口更难判断，但是它们都在编译期完成检查。
+
+> 类和模板都支持接口（interface）和多态（polymorphism）。
+
+> 对类而言接口是显式的，以函数签名为中心。多态则是通过虚函数发生在运行期。
+
+> 对模板参数而言，接口是隐式的，基于有效表达式。多态则是通过模板实例化和函数重载解析（function overloading resolution）发生于编译期。
+
+### 条款42：了解typename的双重意义
+
+模板中的嵌套从属名称（nested dependent name, 嵌套的依赖于某个模板参数的名称，比如`T::iterator`）可能是一个变量名也可能是一个类型名，具体是哪个依赖于提供的模板实参。编译器在解析模板时，需要知道它是什么，一般会假设它是变量名而不是类型名。为了告诉编译器它是类型，需要在名称前加关键字`typename`：
+
+```c
+typename T::iterator* iter;
+// 表示一个指向T的迭代器的指针，而非一个叫iterator的变量乘以一个叫iter的变量
+```
+
+不过在类派生列表和初始化列表中是不必出现的（也不允许出现），毕竟在那里肯定是类型（然而在形参列表中需要，不明白为什么）。
+
+> 声明模板参数时，前缀关键字class和typename可以互换。
+
+> 请使用关键字typename标识嵌套从属类型名称；但不得在类派生列表和初始化列表内以它作为修饰符。
+
+### 条款43：学习处理模板化基类内的名称
+
+考虑下面这个模板：
+
+```c
+template <typename T>
+class Base {
+public:
+    void funcA();
+    ...
+};
+```
+
+在这个模板类里有一个函数funcA.然后该模板有一个全特化：
+
+```c
+template <>
+class Base<myType> {
+public:
+    void funcB();
+    ...
+};
+```
+
+全特化删去了funcA,增加了funcB.此时如果有一个类想继承模板类，并也作为模板，那么：
+
+```c
+template <typename T>
+class Derived: public Base<T> {
+public:
+    void funcC() {
+        funcA();
+        ...
+    }
+    ...
+};
+```
+
+这里会抛出一个编译错误。事实上，这里的funcA是通过继承而来的，但编译器无法确认父类是否有funcA,不到具现化不知道类里究竟有什么，严谨的编译器就会视其为一个错误。正确的做法是要告诉编译器假设funcA就在父类里。
+
+```c
+template <typename T>
+class Derived: public Base<T> {
+public:
+    using Base<T>::funcA;       //方法一
+    void funcC() {
+        this->funcA();          //方法二
+        Base<T>::funcA();       //方法三
+        // 最不好的一个做法。如果funcA是个虚函数，这样会阻止动态绑定
+        ...
+    }
+    ...
+};
+```
+
+这些“承诺”只是编译器在解析（parse）模板时需要的，如果承诺了却没有实践，在后续的编译中仍会报错（`error: ‘funcA’ is not a member of ‘Base<myType>’`）。
+
+> 可在派生类的模板中通过"this->"指涉基类模板内的成员名称，或通过一个显式写出的"基类资格修饰符"完成。
+
+
+### 条款44：将与参数无关的代码抽离templates
+
+```c
+template <typename T, int n>
+void func() {cout << n;}
+// 不好的模板代码。会根据每个非类型参数n的值实例化，得到多份代码
+// 下面的更好
+template <typename T>
+void func(int n) {cout << n;}
+```
+
+冗余的模板实例化会造成代码膨胀。在和性能权衡后要尽可能减少代码膨胀的可能性，比如把模板中一些可有可无的代码移到外面去。实例化时，也可能会实例化出冗余代码（比如用int和long分别实例化，在实际中它们可能没有区别；`void*`可以代替各种指针来实例化）。
+
+> 模板生成多个类和多个函数，所以任何模板代码都不该与某个造成膨胀的模板参数产生相依关系。
+
+> 因非类型模板参数而造成的代码膨胀，往往可消除，做法是以函数参数或类成员变量替换模板参数。
+
+> 因类型参数而造成的代码膨胀，往往可降低，做法是让带有完全相同二进制表述（binary representation）的实例类型（instantiation type，也许是模板实参）共享实现码。
+
+### 条款45：运用成员函数模板接受所有兼容类型
+
+通过声明一个非explicit模板拷贝构造函数，可实现从一个模板实例化的对象向另一个实例化的对象的隐式转换：
+
+```c
+template <typename T>
+class Base {
+public:
+    template<typename U>
+    Base(const Base<U>& other);
+}
+```
+
+有时我们需要在类型T和U之间有联系时（比如可以从U隐式转换成T）才能发生隐式转换，应该如同以下例子一样控制拷贝：
+
+```c
+template <typename T>
+class SmartPtr {
+public:
+    template<typename U>
+    SmartPtr(const SmartPtr<U>& other): heldPtr(other.get()) {...}
+    // 一个智能指针隐式转换的例子。如果从U*不能隐式转换为T*指针，那么此处无法通过编译
+    T* get() const { return heldPtr; }
+private:
+    T* heldPtr;
+}
+```
+
+在T和U类型一样时，泛化的拷贝构造函数会被实例化为普通的非模板的拷贝构造函数（默认拷贝构造函数、拷贝赋值运算符在实例化类中依然会自动生成）。如果需要控制这些普通的默认成员函数，需要在模板定义中声明它们：
+
+```c
+template <typename T>
+class SmartPtr {
+public:
+    template<typename U>
+    SmartPtr(const SmartPtr<U>& other);
+    // 普通的拷贝构造函数。省略了<T>
+    SmartPtr(const SmartPtr& other);
+    // 普通的拷贝赋值运算符
+    SmartPtr& operator=(SmartPtr const& other);
+    T* get() const { return heldPtr; }
+private:
+    T* heldPtr;
+}
+```
+
+> 请使用成员函数模板生成“可接受所有兼容类型”（隐式转换）的函数。
+
+> 如果你声明成员模板用于“泛化拷贝构造”或“泛化赋值操作”，你还是需要声明正常的拷贝构造函数和拷贝赋值操作符（来操作它们）。
+
+### 条款46：需要类型转换时请为模板定义非成员函数
+
+考虑以下代码：
+
+```c
+template <typename T>
+class Rational {
+public:
+    Rational(const T& numerator = 0, const T& denominator = 1);
+    const T numerator() const;
+    const T denominator() const;
+    ...
+};
+template <typename T>
+const Rational<T> operator* (const Rational<T> &lhs, const Rational<T> &rhs) {
+    ...
+}
+
+int main() {
+    Rational<int> oneHalf(1, 2);
+    Rational<int> result = oneHalf * 2;     //错误！无法通过编译
+}
+```
+
+之所以上面的代码无法通过编译，是因为编译器无法推导出operator*的具现化是什么。在template进行实参推导时，不会将隐式转换考虑进去。因此，即使2能隐式转换成与前一个操作数同类型的对象，也无法通过编译。更好的方法是把operator作为Rational类的friend函数。
+
+```c
+template <typename T>
+class Rational {
+public:
+    Rational(const T& numerator = 0, const T& denominator = 1);
+    const T numerator() const;
+    const T denominator() const;
+    friend const Rational operator* (const Rational &lhs, const Rational &rhs);
+    //或者写成
+    //friend const Rational<T> operator* (const Rational<T> &lhs, const Rational<T> &rhs);
+    ...
+};
+template <typename T>
+const Rational<T> operator* (const Rational<T> &lhs, const Rational<T> &rhs) {
+    ...
+}
+```
+
+这样，在`Rational<int> oneHalf(1, 2);`这里，`Rational<int>`类便被实例化出来，它的friend函数也被自动声明出来。这个friend函数是实例而非模板，所以能够进行隐式转换（`int -> Rational<int>`）。
+
+但是，虽然这段代码能通过编译，但却不能连接。（事实上，在我用gcc编译器编译时，它是不能通过编译的。报错信息为"warning: friend declaration ‘const Rational<T> operator*(const Rational<T>&, const Rational<T>&)’ declares a non-template function [-Wnon-template-friend]"。在转换为下面的写法后问题得到了解决。如果泛型类要声明一个友元函数，在我的编译器下它必须也是模板函数。它有一个`template <typename U>`（U是为了和T不同）。然而日式这样它也是无法进行隐式转换。这个问题表明泛化友元的问题在书本这里尚没有说清楚）。解决方法是在声明friend函数时一起把它定义了。
+注意，在这个例子中，friend函数并没有发挥到它传统的访问类non-public成员的功能，而是让operator*成功具现化。由于定义在类内的函数都会暗自成为inline函数，所以如果operator实现了更多行代码时，为了防止代码量膨胀，可以使用一个辅助函数：
+
+```c
+template <typename T> class Rational;       //声明Rational template
+template <typename T>
+const Rational<T> doMultiply(const Rational<T> &lhs, const Rational<T> &rhs);     //辅助函数
+template <typename T>
+class Rational {
+public:
+    ...
+    friend const Rational operator* (const Rational &lhs, const Rational &rhs) {
+        return doMultiply(lhs, rhs);
+    }
+    ...
+};
+```
+
+如此便能让inline函数代码量只剩一行。
+
+> 当我们编写一个类模板，而它所提供的与此模板相关的函数支持“所有形参之隐式类型转换”时，请将那些函数定义为类模板内部的友元函数。
+
+### 条款47：请使用traits class表现类型信息
+
+STL将迭代器分为了5种（input——每次只能向前移动一步且只读一次、output——每次只能向前移动一步且只写一次、forward——可读可写多次、bidirectional——双向移动、random access——随机访问）。C++标准库为这5种迭代器分别提供所谓卷标结构（tag struct）加以确认。在设计支持迭代器的泛型函数时，首先应该判断迭代器属于哪类，才能进行合法的操作。所谓traits允许用户在编译期间获得某些类型信息。由于traits对我很陌生，下面会详细介绍之。
+
+traits是一种技术，也是一个C++程序员共同遵守的协议。这个技术的要求之一，是它对内置类型和用户自定义类型的表现必须一样好（例如对迭代器和普通指针）。以下以指针/迭代器的traits为例：
+
+```c
+template <...>
+class deque {
+public:
+    class iterator {
+    public:
+        typedef random_access_iterator_tag iterator_category;
+        // 用户自定义的迭代器类型嵌套一个typedef以确认恰当的tag struct
+        // 这个deque类的迭代器是随机访问类型的
+    };
+};
+
+template <typename IterT>
+struct iterator_traits {
+    typedef typename IterT::iterator_category iterator_category;
+    // 用户自定义的iterator_category是traits的category
+    ...
+};
+template <typename IterT>
+struct iterator_traits<IterT*> {
+    typedef random_access_iterator_tag iterator_category;
+    // 偏特化版本，指定普通指针的类型为随机访问
+    ...
+};
+
+// 一个应用traits判断迭代器类型的模板函数。
+// 另外，这个函数的目的是将迭代器iter向前移动d步
+template <typename IterT, typename DistT>
+void advance(IterT &iter, DistT d) {
+    if (typeid(typename iterator_traits<IterT>::iterator_category) == (random_access_iterator_tag)) {...}
+    else if (...) {...}
+};
+```
+
+使用`iterator_traits`对迭代器实例化后的`iterator_category`来判断迭代器的类型。上面这个`advance`函数描述出了traits技术的大概面目，但是伴随着另一个问题。请看下面的例子：
+
+```c
+// avdance模板的一个实例化
+void advance(list<int>::iterator &iter, int d) {
+    if (typeid(typename iterator_traits<list<int>::iterator>::iterator_category) == (random_access_iterator_tag)) {
+        iter += d;
+        // 这里无法通过编译
+    }
+    else {
+        if (d >= 0) { while (d--) ++iter; }
+        else        { while (d++) --iter; }
+    }
+};
+```
+
+链表的迭代器是不支持+=的。if判断总是会失败，但编译器必须确保所有源码都有效，即使是不会执行的代码。解决问题的一个思路借鉴了模板元编程（template metaprogramming, TMP）将运行期才确定的东西提前到编译器决定。这不仅节省了时间，还能防止可执行文件膨胀。在编译器执行判断的一个方法是使用重载。
+
+```c
+// 对各种迭代器类型进行重载
+template <typename IterT, typename DistT>
+void doAdvance(IterT &iter, DistT d, random_access_iterator_tag) {
+    iter+= d;
+};
+template <typename IterT, typename DistT>
+void doAdvance(IterT &iter, DistT d, bidirectional_iterator_tag) {
+    if (d >= 0) { while (d--) ++iter; }
+    else        { while (d++) --iter; }
+};
+template <typename IterT, typename DistT>
+void doAdvance(IterT &iter, DistT d, input_iterator_tag) {
+    if (d < 0)
+        throw out_of_range("Negative distance");
+    while (d--) ++iter;
+};
+
+// 修改后的函数。给重载子函数提供traits信息
+template <typename IterT, typename DistT>
+void advance(IterT &iter, DistT d) {
+    doAdvance(
+    iter, d,
+    typename iterator_traits<IterT>::iterator_category
+    );
+};
+```
+
+为每个迭代器类型进行函数重载，让编译器在编译期进行函数匹配，决定使用哪一个版本的函数。如果便可以在编译期进行类型判断，将运行期的工作提前到编译期。
+
+对traits类进行总结，它的使用方法大致有以下两点：
+
+ - 建立一组重载函数或函数模板（如doAdvance），彼此间的差异只在于各自的traits参数。令每个函数实现码与其接受的traits信息相对应。
+ - 建立一个控制函数或函数模板（如advance），它调用上述函数并传递traits类所提供的信息。
+
+traits广泛应用于标准库，除了`iterator_traits`，还有`char_traits`用来保存字符类型的相关信息，以及`numeric_limits`用来保存数值类型的相关信息（没有遵循以`traits`结尾的风格）。
+
+> traits类使得“类型相关信息”在编译期可用。它们以模板和模板特例化实现。
+
+> 整合重载技术后，traits类有可能在编译期对类型执行if...else测试。
+
+### 条款48：认识template元编程
+
+模板元编程（template metaprogramming，TMP）是编写template-based C++程序并执行于编译期的过程。TMP是被发现而非发明出来的。TMP可将工作从运行期转移到编译期，使得某些错误原本通过在运行期才能侦测到，现在可在编译期找出来。TMP可能能让程序更高效：较小的可执行文件、较短的运行期、较少的内存需求。但相对地，编译时间也变长了。一个典型的TMP例子是递归阶乘模板函数。
+
+> TMP可将工作由运行期移往编译期，因而得以实现早期错误侦测和更高的执行效率。
+
+> TMP可被用来生成“基于政策选择组合”（based on combinations of policy choices）的客户定制代码，也可用来避免生成对某些特殊类型并不适合的代码。
+
+### 条款49：了解new-handler的行为
+
+在operator new无法满足某一内存分配需求时，如果客户不指定一个new-handler函数来处理，将会抛出异常。客户调用`<new>`中`set_new_handler`函数来指定new-handler。当new无法满足内存申请时，它会不断调用new-handler函数，直到找到足够内存。一个设计良好的new-handler函数必须做以下事情：
+
+ - 让更多内存可被使用。例如，将某些内存释放，以便下一次内存分配可以成功。
+ - 安装另一个new-handler。如果当前new-handler无法取得更多可用内存，就让另一个new-handler替代自己处理。或者修改自己的行为（例如更改一个static参数）来使得下次被调用时行为不一样。
+ - 卸除new-handler，即将null指针传给`set_new_handler`。一旦没有安装任何new-handler，new会在内存分配不成功时抛出异常。
+ - 抛出`bad_alloc`异常。这样的异常不会被new捕捉，new会在内存分配不成功时抛出异常。
+ - 不返回，通常调用abort或exit。
+
+在书上提到为类提供`set_new_handler`和`operator new`便可在动态创建类对象时使用专属new-handlers，我试了一下书上的写法，似乎有些问题（毕竟类的`set_new_handler`不能“重载`std::set_new_handler`。不过，书中提到的一些复用的设计手段，便值得一提。所谓“怪异的循环模板模式”（curiously recurring template pattern, CRTP），使用一个带有static成员变量的模板函数，实现某一种功能，每个继承它的类都能获得互相不同的static变量：
+
+```c
+template <typename T>
+class CRTP {
+    static int static_val;
+};
+
+class Derived: public CRTP<Derived> {...};
+class Derived2: public CRTP<Derived2> {...};
+// Derived 和 Derived2 都能使用CRTP中的接口，但不尽相同，比如static_val
+```
+
+在书中，CRTP被用来构造拥有自定义new-handler的类的基类。派生自此模板类的类都共用一套`set_new_handler`和`operator new`接口，但是`new_handler`函数指针被设为静态成员，每个类在继承实例时获得自己的专属版本。
+
+> `set_new_handler`允许客户指定一个函数，在内存分配无法获得满足时使用。
+
+> nothrow new是一个颇为局限的工具（分配失败时不抛出异常，而是返回空指针），因为它只适用于内存分配；后继的构造函数调用还是可能抛出异常。
+
+### 条款50：了解new和delete的合理替换时机
+
+重载new和delete是为了：
+
+ - 用来检测运用上的错误。在分配销毁动态内存时，有可能会多次delete同一块内存，还可能因编程错误导致数据overrun（写入点在分配区块尾端之后）或underrun（写入点在分配区块起点之前）。通过自定义一个operator new，便可以超额分配内存，以额外空间（位于客户所得区块之前或之后）放置特定的byte patterns（即签名，signatures）。operator delete检查上述签名是否原封不动，若否则表示在分配区的某个生命时间点发生了overrun或underrun。另外，在设计包含signature的内存分配器时要注意内存对齐问题（alignment）。许多计算机体系结构要求特定类型必须放在特定的内存地址上。比如它可能要求指针的地址必须是4倍数（four-byte aligned），double的地址必须是8倍数（eight-byte aligned）。违反这个约定的程序可能会导致运行期硬件异常，或者降低运行效率（比如Inter X86体系）。比如令签名为int（4字节），分配8字节给一个double变量，得到的指针就是没有对齐的。这会令程序崩溃，或者运行速度慢。X86的缺省`operator new[]`分配一个double数组，也是不保证内存对齐的，必须通过自定义operator new来提高其效率。
+ - 为了强化效能。用户既需要分配大块内存，也需要大量小块内存。分配内存必须考虑破碎问题（fragmentation），这最终会导致程序无法满足大区块内存需求，即使有总量足够但分散为许多小区块的自由内存。因此，缺省的new和delete会取折中的做法，适用范围广，但并不具备最佳性能。缺省new delete存在的问题包含：1）分配和归还内存的速度慢；2）空间额外开销高；3）非最佳齐位；4）不能将相关对象成簇集中。为特定内存分配需求定制的new和delete能大幅减少分配时间和所需内存。
+ - 为了收集使用上的统计数据。自定义new和delete更易收集分配内存的形态（比如倾向于FIFO或LIFO、区块的大小和寿命分布等）。
+
+> 有许多理由需要写个自定的new和delete，包括改善效能、对堆运用错误进行调试、收集堆使用信息。
+
+### 条款51：编写new和delete时需固守常规
+
+在编写自定义new时，为了保持一致性，需要遵守常规：new必须返回正确的值（可以满足内存需求时返回指针，否则抛出`bad_alloc`异常），内存不足时必须调用new-handler函数（如果有的话），必须有对付零内存需求的准备（要求分配0字节），还需要避免不慎掩盖正常形式的new。C++规定，即使客户要求0字节内存，有需要返回一个合法指针，也许是通过分配1字节给用户。一个new的典型行为如下：
+
+```c
+void* operator new(std::size_t size) throw(std::bad_alloc) {
+    // 处理零内存需求
+    if (size == 0) size = 1;
+    while (true) {
+        ...;   // 尝试分配size字节
+        if (success) return pointer;
+        // 分配失败；找出目前的new-handler函数
+        // 只为了取得当前的new-handler，将其设置为0并无意义
+        new_handler globalHandler = set_new_handler(0);
+        set_new_handler(globalHandler);
+        if (globalHandler) (*globalHandler)();
+        else throw std::bad_alloc();
+    }
+}
+```
+
+为自定义类型设计自定义的new和delete，是为了提高创建动态对象的效率。但是，在类被继承后，由于派生类对象的大小大概率会大于基类对象的大小，基类的自定义new和delete或许将不再适用于派生类上。一种处理的方法就是在检查到当前要分配的内存大小和基类大小不再相同时，便改用缺省new处理。
+
+`operator new[]`的函数声明类似`void* operator new[](size_t size);`。在`new int[10]`时，函数获得参数值`size = sizeof(int) * 10 + extra_space`（`extra_space`可能存在，用来记录数组元素个数）。在重载`operator new[]`时，我们无法得知即将创建的数组包含多少元素（因为不知道类对象大小）。唯一需要做的事，就是分配一块未加工内存。
+
+operator delete要做的事唯一需要记住的就是“删除空指针永远安全”。在派生类调用基类重载delete函数时，也需要注意和new一样的问题。另外，如果派生类没有虚析构函数，可能会导致delete接收的`size`参数不准确。
+
+> operator new应该内含一个无穷循环，并在其中尝试分配内存，如果它无法满足内存需求，就该调用new-handler。它也应该有能力处理零内存申请。类专属版本则还应该处理”比正确大小更大的（错误）申请”。
+
+> operator delete应该在收到空指针时不做任何事。类专属版本则还应该处理”比正确大小更大的（错误）申请”。
+
+### 条款52：写了placement new也要写placement delete
+
+接受除了`size`以外的参数的new版本是所谓的placement new。一个典型的placement new是`<new>`头文件中的`void* operator new(size_t, void*);`，它在第二个参数指定的位置创建对象。当我们为类自定义placement new时，必须也要提供相应的placement delete，否则在创建对象过程中发生异常（比如在new分配内存成功后，构造函数抛出异常），这时需要把分配的内存销毁，而编译器无法得知使用哪一个delete。一般来说，placement new的第一个参数是`size_t`类型，而placement delete第一个参数是`void*`类型，对应的placement new和placement delete的其他参数个数和类型都应该相同。如果为类定义了placement new，却没有定义相应的placement delete，在上述异常情况中，不会有任何operator delete被调用。
+
+然而，placement delete就只有这个作用了。在主动`delete p`时，调用的是正常的operator delete（它可以是`void operator delete(void*)`，也可以是`void operator delete(void*, size_t)`）。一个只有placement delete却没有正常delete的类无法成功`delete p`（因为正常delete被隐藏了。placement new也会有这个问题！）。只有为类提供了正常的operator new和operator delete，才能正常使用这些功能。
+
+> 当你写一个placement new，请确定也写出了对应的placement delete。如果没有这样做，你的程序可能会发生隐微而时断时续的内存泄漏。
+
+> 当你声明placement new和placement delete，请确定不要无意识地遮掩了它们的正常版本。
+
+### 条款53：不要轻忽编译器的警告
+
+> 严肃对待编译期发出的警告信息。努力在你的编译器的最高（最严苛）警告级别下争取“无任何警告”的荣誉。
+
+> 不要过度依赖编译器的报警能力，因为不同的编译器对待事情的态度并不相同。一旦移植另一个编译器上，你原本依赖的警告信息可能消失。
+
+### 条款54：让自己熟悉包括TR1在内的标准程序库
+
+C++0x的一些新机能被叙述于一份称为TR1的文档内，象征当时的新标准（如今已经是C++1x的年代了）。TR1加入了一些影响广泛的组件，例如智能指针、函数签名、哈希表、正则表达式等，如今已成为C++程序员日常使用的东西。
+
+> TR1自身只是一份规范。为获得TR1提供的好处，你需要一份实物（现在2020年+早就不需要了）。一个好的实物来源是Boost。
+
+### 条款55：让自己熟悉Boost
+
+Boost是一个C++开发者集结的社群，也是一个高质量的开源C++程序库群。Boost有个目标：作为一个“可被加入标准C++之各种功能”的测试场。一些C++新标准中的新功能，就是起源于Boost。Boost以public peer review为基础，审核过程严格，保证了代码的高质量。它涵盖了多个编程主题。
+
+> Boost是一个社群，也是一个网站。致力于免费、源码开房、同僚复审的C++程序库开发。Boost在C++标准化中扮演深具影响力的角色。
+
+> Boost提供许多TR1组件实现品，以及其他许多程序库。
