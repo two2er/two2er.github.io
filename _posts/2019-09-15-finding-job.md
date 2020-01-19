@@ -123,4 +123,6 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 
 - [C++ Primer思维导图](https://github.com/two2er/two2er.github.io/tree/master/rsc/CppPrimer)
 - [Effective C++](/pages/book/2019-12-28-effectiveCpp)
+- [Msc Course](https://github.com/two2er/two2er.github.io/tree/master/rsc/MscCourse)
+  - [Dimensionality Reduction](/rsc/MscCourse/2019-01-19-modelling_and_visualization_of_high_dimensional_data)
 

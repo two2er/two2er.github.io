@@ -1,4 +1,12 @@
-# Modelling and Visualization of High Dimensional Data
+---
+layout: post
+title: Modelling and Visualization of High Dimensional Data
+excerpt: "Modelling and Visualization of High Dimensional Data Course Note"
+categories: [book]
+comments: true
+---
+
+
 
 ## Curse of Dimensionality and Dimension Reduction
 
