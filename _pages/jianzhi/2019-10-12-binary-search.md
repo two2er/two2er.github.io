@@ -35,6 +35,27 @@ def Find(self, target, array):
 	return False
 ```
 
+```c++
+class Solution {
+public:
+    bool Find(int target, vector<vector<int> > array) {
+        if (array.size() == 0 || array[0].size() == 0)
+            return false;
+        int height = array.size(), width = array[0].size();
+        int x = 0, y = width - 1;
+        while (x < height && y >= 0) {
+            if (array[x][y] == target)
+                return true;
+            else if (array[x][y] > target)
+                --y;
+            else
+                ++x;
+        }
+        return false;
+    }
+};
+```
+
 
 
 ---
@@ -97,6 +118,27 @@ def minNumberInRotateArray(self, nums):
 	return nums[left]
 ```
 
+```c++
+class Solution {
+public:
+    int minNumberInRotateArray(vector<int> rotateArray) {
+        if (rotateArray.size() == 0)
+            return 0;
+        int left = 0, right = rotateArray.size() -1, mid;
+        while (left < right) {
+            mid = (left + right) / 2;
+            if (rotateArray[mid] < rotateArray[right])
+                right = mid;
+            else
+                left = mid + 1;
+        }
+        return rotateArray[left];
+    }
+};
+```
+
+
+
 写binary search最大的难点就是边界问题。处理边界问题时，一定要有一以贯之的前提假设。在我的写法里，预先的假设就是，`binary_search(arr, left, right, target)`这个函数在`arr[left: right+1]`中找到`target`。如果`arr[mid] < target`，说明`arr[left: mid+1]`都不可能了，因此`left = mid + 1`。同理，`arr[mid] > target`时，`arr[mid: right+1]`都不可能，于是`right = mid - 1`。每一次迭代，都是根据更新后的`left`，`right`在`arr[left: right+1]`上寻找`target`。如果`left > right`，那么`arr[left: right+1]`将不包含元素，意味着数组上的元素都已被排除，没有元素等于`target`。在迭代结束后，`left`的位置应该是第一个比`target`大的元素的位置。
 
 
@@ -122,5 +164,25 @@ class Solution:
         return left
     def GetNumberOfK(self, data, target):
         return self.binary_search(data, target+0.5) - self.binary_search(data, target-0.5)
+```
+
+```c++
+class Solution {
+    int BinarySearch(const vector<int> &data, double target) {
+        int left = 0, right = data.size() - 1, mid;
+        while (left <= right) {
+            mid = (left + right) / 2;
+            if (data[mid] < target)
+                left = mid + 1;
+            else
+                right = mid - 1;
+        }
+        return left;
+    }
+public:
+    int GetNumberOfK(vector<int> data ,int k) {
+        return BinarySearch(data, k+0.5) - BinarySearch(data, k-0.5);
+    }
+};
 ```
 
