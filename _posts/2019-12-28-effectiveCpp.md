@@ -311,7 +311,7 @@ void clearBrowser(WebBrowser& wb) {
 }
 ```
 
-根据“越少函数可以访问数据，数据的封装性就越低”的标准，第二种封装性更强，因为它不增加可访问private数据成员的函数数量。另一点，像这样的“便利函数”，可以和类放在同一个namespace下，但分在多个头文件中，实现更好的组织结构。（不过个人认为这个不是很有必要，有种流于形式的感觉）
+根据“越少函数可以访问数据，数据的封装性就越高”的标准，第二种封装性更强，因为它不增加可访问private数据成员的函数数量。另一点，像这样的“便利函数”，可以和类放在同一个namespace下，但分在多个头文件中，实现更好的组织结构。（不过个人认为这个不是很有必要，有种流于形式的感觉）
 
 > 宁可拿non-member、non-friend函数替换member函数。这样做可以增加封装性、包裹弹性（packaging flexibility）和机能扩充性。
 
@@ -528,7 +528,7 @@ void fuc() { Base::fuc(); }
 
 > 派生类内的名词会遮掩基类中的名称。在public继承下从来没有人希望如此。
 
-> 为了让被遮掩的名称重见天日，可使用using声明式或转角函数。
+> 为了让被遮掩的名称重见天日，可使用using声明式或转交函数。
 
 ### 条款34：区分接口继承和实现继承
 
@@ -539,10 +539,10 @@ struct Base {
     virtual void func() = 0;
     void defaultFunc() {...}
 };
-struct DerivedDefault {
+struct DerivedDefault: Base {
     void func() {defaultFunc();}
 };
-struct DerivedNotDefault { };
+struct DerivedNotDefault: Base { };
 // 遗忘覆盖将导致编译失败
 
 Base *ptr = new DerivedNotDefault;
@@ -553,11 +553,7 @@ ptr->func();
 
 > 接口继承和实现继承不同。在public继承之下，派生类总是继承基类的接口。
 
-> 纯虚函数只具体指定接口继承。
-
-> 普通虚函数具体指定接口继承和缺省实现继承。
-
-> 非虚函数具体指定接口继承以及强制性实现继承。
+> 纯虚函数只具体指定接口继承。普通虚函数具体指定接口继承和缺省实现继承。非虚函数具体指定接口继承以及强制性实现继承。
 
 ### 条款35：考虑virtual函数以外的其他选择
 
