@@ -22,10 +22,13 @@ html {
 
 blockquote {
   display: block;
-	position: relative;
+  position: relative;
   padding-left: 20px;
-  // font-style: italic;
-  border-left: 5px solid $secondary;
+  border-left: 5px solid #D6DBDF;
+  background: rgba(102, 128, 153, 0.05);
+  padding: 3px 20px;
+  font-size: 15px;
+  font-family: PingFang SC,Hiragino Sans GB,Helvetica Neue,Microsoft Yahei,WenQuanYi Micro Hei,sans-serif
 }
 
 //
