@@ -35,7 +35,7 @@ layout: default
     </header>
 
     {% if post.excerpt %}
-    <div class="post-description" style="border-bottom: 1px solid #ddd;">
+    <div class="post-description">
       <p>
         {{ post.excerpt }}
       </p>
@@ -57,6 +57,8 @@ layout: default
       {% endif %}
     </div><!-- /.image-wrap -->
     {% endif %}
+
+    <div class="post-separation" style="border-bottom: 1px solid #eaeaea;margin-bottom: 50px;margin-right: 10%;width: 90%;"/>
 
 </section>
 {% endfor %}
