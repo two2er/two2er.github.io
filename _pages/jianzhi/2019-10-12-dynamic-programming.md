@@ -31,6 +31,21 @@ def jumpFloor(self, number):
 	return dp[-1]
 ```
 
+```c++
+class Solution {
+public:
+    int jumpFloor(int number) {
+        int dp[number+1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= number; ++i) {
+            dp[i] = dp[i-1] + dp[i-2];
+        }
+        return dp[number];
+    }
+};
+```
+
 
 
 ---
@@ -69,6 +84,20 @@ def jumpFloorII(self, number):
 	return dp[-1]
 ```
 
+```c++
+class Solution {
+public:
+    int jumpFloorII(int number) {
+        int dp[number+1];
+        dp[1] = 1;
+        for (int i = 2; i <= number; ++i) {
+            dp[i] = dp[i-1] * 2;
+        }
+        return dp[number];
+    }
+};
+```
+
 
 
 ---
@@ -99,6 +128,21 @@ def rectCover(self, number):
     return dp[-1]
 ```
 
+```c++
+class Solution {
+public:
+    int rectCover(int number) {
+        if (number == 0) return 0;
+        int dp_0 = 1, dp_1 = 1, dp_i = 1;
+        for (int i = 2; i <= number; ++i) {
+            dp_i = dp_0 + dp_1;
+            dp_0 = dp_1, dp_1 = dp_i;
+        }
+        return dp_i;
+    }
+};
+```
+
 
 
 ---
@@ -119,6 +163,27 @@ class Solution:
             dp[i] = max([dp[i-j] * j for j in range(1, i+1)])
         return max([dp[number-j] * j for j in range(1, number)])
 ```
+
+```c++
+class Solution {
+public:
+    int cutRope(int number) {
+        int dp[number+1];
+        int tmp;
+        dp[1] = 1, dp[2] = 1;
+        for (int i = 3; i <= number; ++i) {
+            dp[i] = 1;
+            for (int j = 2; j < i; ++j) {
+                tmp = (dp[i-j] >= (i-j) ? dp[i-j] : (i-j)) * j;
+                if (tmp > dp[i]) dp[i] = tmp;
+            }
+        }
+        return dp[number];
+    }
+};
+```
+
+
 
 
 
@@ -144,6 +209,24 @@ def FindGreatestSumOfSubArray(self, array):
 	    dp[i] = dp[i-1] + array[i] if dp[i-1] > 0 else array[i]
 	return max(dp)
 ```
+
+```c++
+// 优化了一下，不需要数组
+class Solution {
+public:
+    int FindGreatestSumOfSubArray(vector<int> array) {
+        int max = 0x80000000, dp = 0;
+        for (int &each: array) {
+            if (dp > 0) dp += each;
+            else dp = each;
+            if (max < dp) max = dp;
+        }
+        return max;
+    }
+};
+```
+
+
 
 
 
@@ -199,6 +282,30 @@ def getNthUglyNo(n):
     return ugly[n-1]
 ```
 
+```c++
+class Solution {
+   public:
+    int GetUglyNumber_Solution(int index) {
+        if (index == 0) return 0;
+        int i2 = 0, i3 = 0, i5 = 0;
+        int t1, t2, t3, min = 1;
+        int ugly[index];
+        ugly[0] = 1;
+        for (int i = 1; i < index; ++i) {
+            t1 = ugly[i2] * 2, t2 = ugly[i3] * 3, t3 = ugly[i5] * 5;
+            min = t1 > t2 ? (t2 > t3 ? t3 : t2) : (t1 > t3 ? t3 : t1);
+            if (min == t1) ++i2;
+            if (min == t2) ++i3;
+            if (min == t3) ++i5;
+            ugly[i] = min;
+        }
+        return min;
+    }
+};
+```
+
+
+
 
 
 ---
@@ -222,6 +329,20 @@ class Solution:
         for i in range(2, n+1):
             idx = (m + idx) % i
         return idx
+```
+
+```c++
+class Solution {
+public:
+    int LastRemaining_Solution(int n, int m) {
+        if (n <= 0 || m <= 0) return -1;
+        int idx = 0;
+        for (int i = 2; i <= n; ++i) {
+            idx = (m + idx) % i;
+        }
+        return idx;
+    }
+};
 ```
 
 
@@ -310,5 +431,41 @@ def isMatch(self, s: str, p: str) -> bool:
             #     # s[i-1] != p[j-1]
             #     dp[i][j] = False
 	return dp[len(s)][len(p)]
+```
+
+```c++
+class Solution {
+public:
+    bool match(char* str, char* pattern) {
+        int len_s = 0, len_p = 0;
+        for (; str[len_s] != '\0'; ++len_s) ;
+        for (; pattern[len_p] != '\0'; ++len_p) ;
+        int dp[len_s+1][len_p+1];
+        for (int i = 0; i <= len_s; ++i)
+            for (int j = 0; j <= len_p; ++j)
+                dp[i][j] = 0;
+        dp[0][0] = 1;
+        for (int j = 1; j < len_p; j+=2) {
+            if (pattern[j] == '*') dp[0][j+1] = 1;
+            else break;
+        }
+        for (int i = 0; i < len_s; ++i) {
+            for (int j = 0; j < len_p; ++j) {
+                if (str[i] == pattern[j] || pattern[j] == '.')
+                    dp[i+1][j+1] = dp[i][j];
+                else if (pattern[j] == '*') {
+                    if (j > 0) {
+                        dp[i+1][j+1] |= dp[i+1][j-1];
+                        if (pattern[j-1] == str[i] || pattern[j-1] == '.') {
+                            dp[i+1][j+1] |= dp[i][j-1];
+                            dp[i+1][j+1] |= dp[i][j+1];
+                        }
+                    }
+                }
+            }
+        }
+        return dp[len_s][len_p];
+    }
+};
 ```
 

@@ -33,6 +33,31 @@ class Solution:
         return self.s2.pop()
 ```
 
+```c++
+class Solution {
+public:
+    void push(int node) {
+        stack1.push(node);
+    }
+
+    int pop() {
+		if (stack2.empty()) {
+            while (!stack1.empty()) {
+                stack2.push(stack1.top());
+                stack1.pop();
+            }
+		}
+		int rtn = stack2.top();
+        stack2.pop();
+        return rtn;
+    }
+
+private:
+    stack<int> stack1;
+    stack<int> stack2;
+};
+```
+
 
 
 ---
@@ -69,6 +94,35 @@ class Solution:
         return self.min_
 ```
 
+```c++
+class Solution {
+   public:
+    void push(int value) {
+		if (value <= _min) {
+			stk.push(_min);
+			_min = value;
+		}
+		stk.push(value);
+	}
+    void pop() {
+		if (stk.top() == _min) {
+			stk.pop();
+			_min = stk.top();
+		}
+		stk.pop();
+	}
+    int top() {
+		return stk.top();
+	}
+    int min() {
+		return _min;
+	}
+   private:
+    int _min = 0x7fffffff;
+	stack<int> stk;
+};
+```
+
 
 
 ---
@@ -97,6 +151,24 @@ def IsPopOrder(self, pushV, popV):
 	return i == len(popV)
 ```
 
+```c++
+class Solution {
+public:
+    bool IsPopOrder(vector<int> pushV,vector<int> popV) {
+        stack<int> stk;
+        int i = 0;
+        for (int ele: pushV) {
+            stk.push(ele);
+            while (i < popV.size() && popV[i] == stk.top()) {
+                stk.pop();
+                ++i;
+            }
+        }
+        return (i == popV.size());
+    }
+};
+```
+
 
 
 ---
@@ -115,6 +187,27 @@ def ReverseSentence(self, s):
 	if len(set(s)) == 1 and ' ' in s:
 	    return s
 	return ' '.join(s.split()[::-1])
+```
+
+```c++
+class Solution {
+   public:
+    string ReverseSentence(string str) {
+        if (str.length() <= 1) return str;
+        std::istringstream iss(str);
+        std::ostringstream oss;
+        std::vector<string> store;
+        string tmp;
+        while (iss >> tmp) {
+            store.push_back(tmp);
+        }
+        for (int i = store.size() - 1; i >= 1; --i) {
+            oss << store[i] << ' ';
+        }
+        oss << store[0];
+        return oss.str();
+    }
+};
 ```
 
 
@@ -151,6 +244,34 @@ class Solution:
         return rtn
 ```
 
+```c++
+#include <deque>
+#include <vector>
+using std::vector;
+class Solution {
+public:
+    vector<int> maxInWindows(const vector<int>& num, unsigned int size) {
+        std::deque<int> q;
+        vector<int> rtn;
+        for (int i = 0, end = num.size(); i < end; ++i) {
+            if (!q.empty() && q.front() == i - size) {
+                q.pop_front();
+                q.pop_front();
+            }
+            while (!q.empty() && q.back() < num[i]) {
+                q.pop_back();
+                q.pop_back();
+            }
+            q.push_back(i);
+            q.push_back(num[i]);
+            if (i >= size - 1)
+                rtn.push_back(q[1]);
+        }
+        return rtn;
+    }
+};
+```
+
 
 
 ---
@@ -166,9 +287,7 @@ class Solution:
 ```python
 class Solution:
     def GetLeastNumbers_Solution(self, tinput, k):
-        if len(tinput) < k:
-            return []
-        return sorted(tinput)[:k]
+        return sorted(tinput)[:k] if len(tinput) >= k else []
 ```
 
 或者也可以用堆来做。
@@ -186,6 +305,26 @@ class Solution:
         for _ in range(k):
             rtn.append(heapq.heappop(heap))
         return rtn
+```
+
+```c++
+#include <queue>
+class Solution {
+   public:
+    vector<int> GetLeastNumbers_Solution(vector<int> input, int k) {
+        if (input.size() < k) return {};
+        std::priority_queue<int> pq;
+        for (int &each: input) {
+            pq.push(-each);
+        }
+        vector<int> rtn;
+        for (int i = 0; i < k; ++i) {
+            rtn.push_back(-pq.top());
+            pq.pop();
+        }
+        return rtn;
+    }
+};
 ```
 
 
@@ -212,5 +351,36 @@ def FirstNotRepeatingChar(self, s):
 	    else:
 	        place[idx] = -2
 	return min([p for p in place if p >= 0])
+```
+
+```c++
+#include <string>
+#include <vector>
+using std::string;
+class Solution {
+   public:
+    int FirstNotRepeatingChar(string str) {
+        if (str.empty()) return -1;
+        std::vector<int> place(52, -1);
+        char c;
+        for (int i = 0, idx; i < str.length(); ++i) {
+            c = str[i];
+            if (c >= 97)
+                idx = c - 97;
+            else
+                idx = c - 65 + 26;
+            if (place[idx] == -1)
+                place[idx] = i;
+            else
+                place[idx] = -2;
+        }
+        int min = 0x7fffffff;
+        for (int i = 0; i < 52; ++i) {
+            if (place[i] >= 0 && place[i] < min) min = place[i];
+        }
+        if (min == 0x7fffffff) return -1;
+        return min;
+    }
+};
 ```
 
