@@ -9,11 +9,11 @@ comments: true
 
 ---
 
-## 
 
-Recently I read a paper called *Fast k-Nearest Neighbour Search via Dynamic Continuous Indexing* [1] and its 2.0 version *Fast k-Nearest Neighbour Search via Prioritized DCI* [2]. Since this is one of the research topics of my MSc. Dissertation, I would like to make some comments on it. In my opinion, the two methods, DCI and pDCI, proposed by the same author Ke Li, have a strong relation to LSH [4]. LSH is a big family of hash-based kNN algorithms. To illustrate my view, I choose the Random Projection implementation, which was described in [2]. The pseudo-code of this implementation is as following:
 
-```pseudocode
+Recently I read a paper called *Fast k-Nearest Neighbour Search via Dynamic Continuous Indexing* [1] and its 2.0 version *Fast k-Nearest Neighbour Search via Prioritized DCI* [2]. Since this is one of the research topics of my MSc. Dissertation, I would like to make some comments on it. In my opinion, the two methods, DCI and pDCI, proposed by the same author Ke Li, have a strong relation to LSH [3]. LSH is a big family of hash-based kNN algorithms. To illustrate my view, I choose the Random Projection implementation, which was described in [4]. The pseudo-code of this implementation is as following:
+
+```c
 Algorithm 1 LSH Random Projection
 -----------------------------------------------
 Require: A dataset D of n points p[1], p[2], ..., p[n], the number of random vectors m that constitute a (composite) projection and the number of projections L, the number of bins on each vector
@@ -49,13 +49,13 @@ function QUERY(q, k):
 end function
 ```
 
-This is not the original procedure of the Random Projection LSH implementation described in [2], but a modification to follow the variables naming and writing style of Ke Li. Some steps seem unnecessary, like adding candidates into `S[L]` according to the current (composite) projection rather than adding them into a big set `S`. This is deliberate for comparison with DCI/pDCI, and it will not affect anything except for a little bit computation cost. 
+This is not the original procedure of the Random Projection LSH implementation described in [4], but a modification to follow the variables naming and writing style of Ke Li. Some steps seem unnecessary, like adding candidates into `S[L]` according to the current (composite) projection rather than adding them into a big set `S`. This is deliberate for comparison with DCI/pDCI, and it will not affect anything except for a little bit computation cost. 
 
-The reason why we need `m` random vectors (in [2], the author used the notation `k` to denote the number of random vectors) and `L` composite projections is clearly explained in [2]. In [1], the idea of setting `L` composite indices with `m` simple indices each is quite similar to the idea of the composite projection, and I believe that Ke Li was inspired by LSH to some extent when he invented DCI though he did not talk about this in his paper.
+The reason why we need `m` random vectors (in [4], the author used the notation `k` to denote the number of random vectors) and `L` composite projections was clearly explained in [4]. In [1], the idea of setting `L` composite indices with `m` simple indices each is quite similar to the idea of the composite projection, and I believe that Ke Li was inspired by LSH to some extent when he invented DCI though he did not talk about this in his paper.
 
 For a clear comparison, the pseudo-code of DCI would also be placed here, as follows:
 
-```pseudocode
+```c
 Algorithm 2 Dynamic Continuous Indexing (DCI)
 -----------------------------------------------
 Require: A dataset D of n points p[1], p[2], ..., p[n], the number of random vectors m that constitute a (composite) projection and the number of projections L, the number of bins on each vector
@@ -122,4 +122,6 @@ The experiment result is consistent with the figure 2 in the paper. However, thi
 
 [2] Li, Ke, and Jitendra Malik. "Fast k-nearest neighbour search via prioritized dci." In Proceedings of the 34th International Conference on Machine Learning-Volume 70, pp. 2081-2090. JMLR. org, 2017.
 
-[3] M. Slaney and M. Casey, "Locality-Sensitive Hashing for Finding Nearest Neighbors [Lecture Notes]," in *IEEE Signal Processing Magazine*, vol. 25, no. 2, pp. 128-131, March 2008.
+[3] Datar, Mayur, Nicole Immorlica, Piotr Indyk, and Vahab S. Mirrokni. "Locality-sensitive hashing scheme based on p-stable distributions." In *Proceedings of the twentieth annual symposium on Computational geometry*, pp. 253-262. 2004.
+
+[4] M. Slaney and M. Casey, "Locality-Sensitive Hashing for Finding Nearest Neighbors [Lecture Notes]," in *IEEE Signal Processing Magazine*, vol. 25, no. 2, pp. 128-131, March 2008.
