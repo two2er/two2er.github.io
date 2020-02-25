@@ -27,6 +27,24 @@ def reverseList(self, head):
 	return prev
 ```
 
+```c++
+class Solution {
+   public:
+    ListNode *ReverseList(ListNode *pHead) {
+        if (!pHead || !head.next) return pHead;
+        ListNode *prev = nullptr, *curr = pHead, *next;
+        while (curr) {
+            next = curr->next;
+            curr->next = prev;
+            prev = curr, curr = next;
+        }
+        return prev;
+    }
+};
+```
+
+
+
 第二种解法也很经典：使用递归，将当前节点之后的子链表翻转后，和当前节点接上——这样从当前节点开始的链表就是一个完整的翻转链表了。
 
 ```python
@@ -38,6 +56,21 @@ def ReverseList(self, head):
 	head.next = None
 	return new_head
 ```
+
+```c++
+class Solution {
+   public:
+    ListNode *ReverseList(ListNode *pHead) {
+        if (!pHead || !pHead->next) return pHead;
+        ListNode *new_head = ReverseList(pHead->next);
+        pHead->next->next = pHead;
+        pHead->next = nullptr;
+        return new_head;
+    }
+};
+```
+
+
 
 顺便吐槽一句：牛客网的在线编程框太烂了，甚至比本科使用的课程OJ还烂，讨论区质量也很低。不过毕竟只有67题，暂时忍一下。或者移步到LeetCode的相似问题做提交。
 
@@ -64,6 +97,21 @@ def FindKthToTail(self, head, k):
 	    ptr1 = ptr1.next
 	    ptr2 = ptr2.next
 	return ptr1
+```
+
+```c++
+class Solution {
+   public:
+    ListNode *FindKthToTail(ListNode *pListHead, unsigned int k) {
+        ListNode *ptr1 = pListHead, *ptr2 = pListHead;
+        for (int i = 0; i < k; ++i) {
+            if (!ptr1) return nullptr;
+            ptr1 = ptr1->next;
+        }
+        while (ptr1) ptr1 = ptr1->next, ptr2 = ptr2->next;
+        return ptr2;
+    }
+};
 ```
 
 
@@ -95,7 +143,28 @@ def Merge(self, pHead1, pHead2):
 	return pHead.next
 ```
 
+```c++
+class Solution {
+   public:
+    ListNode *Merge(ListNode *pHead1, ListNode *pHead2) {
+        ListNode *rtn = new ListNode(0), *curr = rtn;
+        while (pHead1 && pHead2) {
+            if (pHead1->val < pHead2->val) curr->next = new ListNode(pHead1->val), pHead1 = pHead1->next;
+            else curr->next = new ListNode(pHead2->val), pHead2 = pHead2->next;
+            curr = curr->next;
+        }
+        while (pHead1)
+            curr->next = new ListNode(pHead1->val), pHead1 = pHead1->next, curr = curr->next;
+        while (pHead2)
+            curr->next = new ListNode(pHead2->val), pHead2 = pHead2->next, curr = curr->next;
+        curr = rtn->next;
+        delete rtn;
+        return curr;
+    }
+};
+```
 
+​    
 
 ---
 
@@ -127,6 +196,38 @@ def Clone(self, pHead):
 
 另外还要吐槽一下牛客网：这样的[代码](<https://www.nowcoder.com/profile/689521/codeBookDetail?submissionId=9315265>)为什么能通过测试？答案完全错误（用一个单节点链表、根节点的`random`自指测试一下就知道了），而且我将无用的第15行删去后提交，居然说内存越界？这不是Python吗，报错说内存越界？牛客网的OJ真的做得太一般了。
 
+```c++
+class Solution {
+   public:
+    RandomListNode *Clone(RandomListNode *pHead) {
+        if (!pHead) return nullptr;
+        RandomListNode *curr = pHead;
+        while (curr) {
+            RandomListNode *tmp = new RandomListNode(curr->label);
+            tmp->next = curr->next, curr->next = tmp;
+            curr = tmp->next;
+        }
+        RandomListNode *rtn = pHead->next, *curr2 = rtn;
+        curr = pHead;
+        while (curr) {
+            if (curr->random) curr2->random = curr->random->next;
+            curr = curr->next->next;
+            if (curr) curr2 = curr->next;
+        }
+        curr = pHead, curr2 = rtn;
+        while (curr) {
+            if (curr2->next) {
+                curr->next = curr2->next, curr2->next = curr2->next->next;
+            } else {
+                curr->next = nullptr;
+            }
+            curr = curr->next, curr2 = curr2->next;
+        }
+        return rtn;
+    }
+};
+```
+
 
 
 ---
@@ -137,19 +238,23 @@ def Clone(self, pHead):
 
 > 输入两个链表，找出它们的第一个公共结点。
 
-非常简单，选用合适的数据结构来存访问过的节点值就可以了。时间复杂度和空间复杂度都为`O(n)`。
+假设我们从第一个链表的`head`出发，走到末尾时跳转到第二个链表的`head`，直到第一个公共节点停下，走的路程是`len1 + com2`，其中`len1`是链表1的长度，`com2`是链表2 `head`到第一个公共节点距离。然后，我们从第二个链表`head`出发，走到末尾时跳转到第一个链表的`head`，直到第一个公共节点停下，走的路程是`len2 + com1`，`com1` 是链表1 `head`到第一个公共节点的距离。容易看出来 `len1 + com2 == len2 + com1`，所以在这种走法下，最终它们会在公共节点处相遇。
 
-```python
-def FindFirstCommonNode(self, pHead1, pHead2):
-	vals = set()
-	while pHead1:
-	    vals.add(pHead1.val)
-	    pHead1 = pHead1.next
-	while pHead2:
-	    if pHead2.val in vals:
-	        return pHead2
-	    pHead2 = pHead2.next
-	return None
+```c++
+class Solution {
+   public:
+    ListNode *FindFirstCommonNode(ListNode *pHead1, ListNode *pHead2) {
+        if (!pHead1 || !pHead2) return nullptr;
+        ListNode *curr1 = pHead1, *curr2 = pHead2;
+        while (curr1 != curr2) {
+            curr1 = curr1->next, curr2 = curr2->next;
+            if (!curr1 && !curr2) return nullptr;
+            if (!curr1) curr1 = pHead2;
+            if (!curr2) curr2 = pHead1;
+        }
+        return curr1;
+    }
+};
 ```
 
 
@@ -199,6 +304,24 @@ def EntryNodeOfLoop(self, pHead):
 	return None
 ```
 
+```c++
+class Solution {
+   public:
+    ListNode *EntryNodeOfLoop(ListNode *pHead) {
+        ListNode *fast = pHead, *low = pHead;
+        while (fast && fast->next) {
+            fast = fast->next->next, low = low->next;
+            if (fast == low) {
+                ListNode *fast = pHead;
+                while (fast != low) fast = fast->next, low = low->next;
+                return fast;
+            }
+        }
+        return nullptr;
+    }
+};
+```
+
 
 
 ---
@@ -226,5 +349,33 @@ def deleteDuplication(self, pHead):
 	        pHead = pHead.next
 	vptr.next = None
 	return vHead.next
+```
+
+```c++
+class Solution {
+   public:
+    ListNode *deleteDuplication(ListNode *pHead) {
+        if (!pHead) return nullptr;
+        ListNode *vHead = new ListNode(0), *vptr = vHead, *tptr;
+        vHead->next = pHead;
+        int tmp;
+        
+        while (vptr->next) {
+            if (vptr->next->next && vptr->next->val == vptr->next->next->val) {
+                tmp = vptr->next->val;
+                while (vptr->next && (vptr->next->val == tmp)) {
+                    tptr = vptr->next, vptr->next = vptr->next->next;
+                    delete tptr;
+                }
+            } else {
+                vptr = vptr->next;
+            }
+        }
+        
+        pHead = vHead->next;
+        delete vHead;
+        return pHead;
+    }
+};
 ```
 

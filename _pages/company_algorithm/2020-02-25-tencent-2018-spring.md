@@ -150,6 +150,43 @@ int main() {
 }
 ```
 
+下面是代码的优化版，参考了[背包问题九讲](https://www.kancloud.cn/kancloud/pack/70125)。值得一提的是，原文中
+
+> 由于只需要最后f[v]的值，倒推前一个物品，其实只要知道f[v-w[n]]即可。
+
+是错的，应该是要知道`f[v-c[n]]`。因此，`bound`也应该为
+
+```c++
+bound=max{V-sum{c[i..n]},c[i]};
+```
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+inline int len(int n, int X, int A, int B) { return n < X ? A : B; }
+
+int main() {
+    int K, A, X, B, Y;
+    cin >> K >> A >> X >> B >> Y;
+    int N = X + Y, len_, bound;
+
+    long dp[K + 1];
+    dp[0] = 1;
+    for (int k = 1; k <= K; ++k) dp[k] = 0;
+    long sum = K - (A * X + B * Y);
+
+    for (int n = 1; n <= N; ++n) {
+        len_ = len(n - 1, X, A, B);
+        sum += len_;
+        for (int k = K; k >= sum; --k) {
+            if (k >= len_) dp[k] = (dp[k] + dp[k - len_]) % 1000000007;
+        }
+    }
+    cout << dp[K];
+}
+```
+
 
 
 ## 安排机器

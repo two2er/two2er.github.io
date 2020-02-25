@@ -46,6 +46,43 @@ def hasPath(self, matrix, rows, cols, path):
     return False
 ```
 
+```c++
+class Solution {
+    int rows_, cols_;
+    bool DFS(char *matrix, int x, int y, char *path) {
+        if (!*path) return true;
+        int moves[][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int ix, iy;
+        for (auto move: moves) {
+            ix = x + move[0], iy = y + move[1];
+            if (ix >= 0 && ix < rows_ && iy >= 0 && iy < cols_ && (matrix[ix * cols_ + iy] == *path)) {
+                matrix[ix * cols_ + iy] = 0;
+                bool flag = DFS(matrix, ix, iy, path+1);
+                matrix[ix * cols_ + iy] = *path;
+                if (flag) return true;
+            }
+        }
+        return false;
+    }
+   public:
+    bool hasPath(char* matrix, int rows, int cols, char* str) {
+        if (!*str) return false;
+        rows_ = rows, cols_ = cols;
+        for(int x = 0; x < rows; ++x) {
+            for (int y = 0; y < cols; ++y) {
+                if (*str == matrix[x*cols+y]) {
+                    matrix[x * cols + y] = 0;
+                    bool flag = DFS(matrix, x, y, str+1);
+                    matrix[x * cols + y] = *str;
+                    if (flag) return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+```
+
 
 
 ---
@@ -77,6 +114,44 @@ def movingCount(self, threshold, rows, cols):
     return len(path)
 ```
 
+```c++
+#include <set>
+#include <utility>
+class Solution {
+    int val(int x, int y) {
+        int sum = 0;
+        for (int e: {x, y}) {
+            while (e) {
+                sum += e % 10;
+                e /= 10;
+            }
+        }
+        return sum;
+    }
+    std::set<std::pair<int, int>> path;
+    int rows_, cols_, threshold_;
+    void DFS(int x, int y) {
+        int moves[][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        int ix, iy;
+        for (auto move: moves) {
+            ix = x + move[0], iy = y + move[1];
+            if (ix >= 0 && ix < rows_ && iy >= 0 && iy < cols_ && val(ix, iy) <= threshold_ && path.find(std::make_pair(ix, iy)) == path.end()) {
+                path.insert(std::make_pair(ix, iy));
+                DFS(ix, iy);
+            }
+        }
+    }
+   public:
+    int movingCount(int threshold, int rows, int cols) {
+        if (threshold < 0) return 0;
+        rows_ = rows, cols_ = cols, threshold_ = threshold;
+        path = {std::make_pair(0, 0)};
+        DFS(0, 0);
+        return path.size();
+    }
+};
+```
+
 
 
 ---
@@ -100,5 +175,33 @@ class Solution:
                 ps.update(recursive(chars[:i]+chars[i+1:], s+chars[i]))
             return ps
         return sorted(list(recursive(list(ss), '')))
+```
+
+```c++
+#include <vector>
+#include <string>
+#include <set>
+#include <algorithm>
+class Solution {
+    std::set<string> rtn;
+    void recursive(string left, string substr) {
+        if (!left.length()) {
+            rtn.insert(substr);
+        }
+        for (int i = 0; i < left.length(); ++i) {
+            string left_ = left.substr(0, i) + left.substr(i+1, left.length());
+            recursive(left_, substr + left[i]);
+        }
+    }
+   public:
+    vector<string> Permutation(string str) {
+        if (!str.length()) return {};
+        rtn.clear();
+        recursive(str, "");
+        vector<string> rtn_(rtn.begin(), rtn.end());
+        std::sort(rtn_.begin(), rtn_.end());
+        return rtn_;
+    }
+};
 ```
 
