@@ -51,7 +51,7 @@ class Solution {
     int rows_, cols_;
     bool DFS(char *matrix, int x, int y, char *path) {
         if (!*path) return true;
-        int moves[][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int moves[][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
         int ix, iy;
         for (auto move: moves) {
             ix = x + move[0], iy = y + move[1];
@@ -131,7 +131,7 @@ class Solution {
     std::set<std::pair<int, int>> path;
     int rows_, cols_, threshold_;
     void DFS(int x, int y) {
-        int moves[][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        int moves[][2] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
         int ix, iy;
         for (auto move: moves) {
             ix = x + move[0], iy = y + move[1];
