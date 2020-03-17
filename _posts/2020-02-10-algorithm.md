@@ -8,7 +8,14 @@ comments: true
 
 ---
 
+## 较不常见数据结构/算法总结
 
+有一些不太常见、但又有较多人听说过的数据结构/算法，需要靠平时多积累。所以写短文，总结我收集的这类数据结构/算法。这些短文的目标是不断更新，直到变成长文……（希望吧）（2019.10.08）
+
+- [算法](/pages/algorithms/2019-10-08-unusual-algorithms)
+- [数据结构](/pages/algorithms/2019-10-08-unusual-data-structure)
+
+---
 
 ## LeetCode
 
@@ -21,7 +28,7 @@ comments: true
 - [Top 100 Liked Questions](/pages/LeetCode/2019-12-05-LCTop100)
 - to be continued...
 
-
+---
 
 ## 剑指offer
 
@@ -96,3 +103,9 @@ comments: true
   - 50-数组中重复的数字
   - 51-构建乘积数组
   - 54-字符流中第一个不重复的字符 
+
+---
+
+## 校招算法题
+
+- [腾讯2018春招](/pages/company_algorithm/2020-02-25-tencent-2018-spring)

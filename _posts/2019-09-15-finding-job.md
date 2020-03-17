@@ -21,15 +21,6 @@ CS224N是一个很好的NLP网课，挺值得从头到尾细致学习。我把�
 
 ---
 
-## 较不常见数据结构/算法总结
-
-有一些不太常见、但又有较多人听说过的数据结构/算法，需要靠平时多积累。所以写短文，总结我收集的这类数据结构/算法。这些短文的目标是不断更新，直到变成长文……（希望吧）（2019.10.08）
-
-- [算法](/pages/algorithms/2019-10-08-unusual-algorithms)
-- [数据结构](/pages/algorithms/2019-10-08-unusual-data-structure)
-
----
-
 ## 读书笔记
 
 - [C++ Primer思维导图](https://github.com/two2er/two2er.github.io/tree/master/rsc/CppPrimer)

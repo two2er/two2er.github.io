@@ -343,3 +343,99 @@ class DisjointSet:
         return self.find(x1) == self.find(x2)
 ```
 
+
+
+## 用栈做先序/中序/后序遍历
+
+鉴于这个知识点还是考得挺多的，自己也没有一下子精准写出来的智商（虽然原理不难），所以就把它也写出来以供复习。
+
+我觉得，为了让自己思维不混乱，首先要对“栈里装的是什么”这个问题有清晰的认识。
+
+首先是先序遍历。先序遍历在访问完当前节点后，会移动到左子树，而右子树的根节点需要记录下来在栈中，等待之后访问。由于右子树们是由下至上访问的，符合栈LIFO的特质，所以把右孩子都压进栈即可。这时，栈里装的是“待遍历的（右）子树的根节点”。因此从栈中`pop`出来节点后，只需按`preorder`流程访问、压节点入栈即可。
+
+```python
+def preorderTraversal(self, root: TreeNode):
+	stack = [root]
+	while stack:
+        # traverse the subtree whose root is node / preorder(node)
+	    node = stack.pop()
+	    while node:
+	        if node.right:
+	            stack.append(node.right)
+	        visit(node)
+	        node = node.left
+```
+
+中序遍历和后序遍历会稍微复杂一点。中序遍历优先访问左孩子，所以一棵子树中，最先被访问的一定是那个“最左”的节点，也就是从根节点一直向左，直到无法再左的节点。到达这个节点后，访问之，然后就去遍历它的右子树；然后，退回它的父节点，访问父节点，然后访问父节点的右子树……可以看到，这个过程中，“父节点”们是从下至上被访问的，适合储存在栈中。这时，栈中存储的是“左子树被遍历过，而根节点和右子树尚未被遍历的子树的根节点”。从栈中取出一个节点后，要先访问它，然后对它的右孩子进行`inorder`操作。为了简化代码，我们可以把“最左”节点也当成“左子树被访问过，而根节点和右子树尚未被访问的子树的根节点”，并把它们也压入栈中。
+
+```python
+def inorderTraversal(self, node: TreeNode) -> List[int]:
+	stack = []
+	while node or stack:
+	    # if node, traverse the subtree whose root is node / inorder(node)
+	    # if not node, go to stack.pop()
+	    while node:
+	        # go to the left most node, and store parent nodes
+	        stack.append(node)
+	        node = node.left
+	    # now node is the left most node, or the last parent node
+	    node = stack.pop()
+	    # visit node, and then go to its right subtree
+	    visit(node)
+	    # if node.right is None, the "while node" step would just skip
+	    # and the stack could pop the last parent node
+	    node = node.right
+```
+
+后序遍历也是从“最左”节点开始访问。我们可以模仿中序遍历，一路直达最左节点，将路上的父节点都存在栈中。在遍历完一棵左子树后，从栈中弹出一个节点，即左子树的父节点。下一步，遍历这个父节点的右子树。这里存在一个重要的问题：父节点何时被访问呢？在遍历完左子树后，会从栈中取出父节点一次，进入它的右子树；在遍历完右子树后又需要到达父节点，访问之。这意味着被存在栈中的父节点总共需要被取出2次。因此，在第一次取出时，不能将其`pop`，第二次就无法找回它了。只有在一个父节点被访问完后，我们才能将其`pop`。另外，我们也注意到，将一个节点从栈中`pop`出来，代表着以它为根节点的子树已经完整遍历完。因此，在我们`pop`出一个节点的右孩子后，它的左、右子树都遍历完了，下一个被访问的就是它自己。它被访问完后`pop`掉。所以，如果一个栈顶节点的右孩子是上一个被`pop`的节点，那么它就会被访问，然后被`pop`；否则，意味着它的右子树还未被遍历，进入它的右子树。至此，我们可以总结：栈中存储的是“左子树被遍历过，右子树可能被遍历过，根节点尚未被访问的子树的根节点”。判断右子树是否被遍历，要看上一个被`pop`的节点是否为当前节点的右孩子。
+
+```python
+def postorderTraversal(self, node: TreeNode) -> List[int]:
+	stack = []
+	last = None         # last popped node
+	while node or stack:
+	    # if node, traverse the subtree whose root is node / postorder(node)
+	    # if not node, go to stack.pop()
+	    while node:
+	        # go to the left most node, and store parent nodes
+	        stack.append(node)
+	        node = node.left
+	    # now node is the left most node, or the last parent node
+	    node = stack[-1]
+	    # whether its right child has been visited
+	    # pop all nodes whose right subtree has been traversed
+	    while not node.right or node.right == last:
+	        # the right child has been visited
+	        self.visit(node)
+	        last = stack.pop()
+	        if stack:
+	            # go to the last unvisited node
+	            node = stack[-1]
+	        else:
+	            # all nodes has been visited
+	            return
+	    else:
+	        # go to the right subtree
+	        node = node.right
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
