@@ -13,7 +13,7 @@ comments: true
 
 搜索树是一种非常常见的数据结构。搜索树的节点对象包含`key`和`value`两个成员变量。给定一棵搜索树和一个指定`key`，我们可以通过在这棵树种找到具有对应`key`的节点，取得其`value`，来完成一次`key->value`的映射操作。这个想法是C++`map`数据结构的根本，C++ `map`就是用红黑树搜索树实现的。当然，C++的`unordered_map`使用哈希函数作为映射方法，增删改查的效率都和以搜索树为基础的映射方法不同。由于搜索树概念的重要性，它在面试中常考，“手写红黑树”已经成为面试者口口相传的一个恐怖传说……
 
-下面是搜索树树节点和树基类的代码实现。下文的各种搜索树都继承自该基类。
+下面是（二叉）树节点和树基类的代码实现。下文的一些搜索树继承自该基类。
 
 ```c++
 template <typename T, typename U>
@@ -172,15 +172,15 @@ class AVLTree : public BinarySearchTree<T, U> {
 
     using SearchTree<T, U>::root;
     using BinarySearchTree<T, U>::_hot;
-	using SearchTree<T, U>::updateHeight;
-	using BinarySearchTree<T, U>::_remove;
-	
-	#define balanceFactor(node) ( getHeight((node)->left) - getHeight((node)->right) )
-	#define isLChild(node) ( (node)->parent && (node)->parent->left == (node) )
-	#define fromParentTo(node)                                                   \
-		((node)->parent                                                          \
-			? (isLChild(node) ? (node)->parent->left : (node)->parent->right) \
-			: root)
+    using SearchTree<T, U>::updateHeight;
+    using BinarySearchTree<T, U>::_remove;
+    
+    #define balanceFactor(node) ( getHeight((node)->left) - getHeight((node)->right) )
+    #define isLChild(node) ( (node)->parent && (node)->parent->left == (node) )
+    #define fromParentTo(node)                                                   \
+        ((node)->parent                                                          \
+            ? (isLChild(node) ? (node)->parent->left : (node)->parent->right) \
+            : root)
 
     bool AvlUnbalanced(TreeNode<T, U> *node) {
         int bf = balanceFactor(node);
@@ -196,38 +196,38 @@ class AVLTree : public BinarySearchTree<T, U> {
         else return node->right;
     }
 
-	TreeNode<T, U>* rotate(TreeNode<T, U> *v) {
-		TreeNode<T, U> *p = v->parent, *g = p->parent;
-		// connect 3+4 structure based on relation between g, p, v
-		if (isLChild(p)) { // zig
-			if (isLChild(v)) { // zig-zig
-				p->parent = g->parent;
-				return connect34(v, p, g, v->left, v->right, p->right, g->right);
-			} else { // zig-zag
-				v->parent = g->parent;
-				return connect34(p, v, g, p->left, v->left, v->right, g->right);
-			}
-		} else { // zag
-			if (isLChild(v)) { // zag-zig
-				v->parent = g->parent;
-				return connect34(g, v, p, g->left, v->left, v->right, p->right);
-			} else { // zag-zag
-				p->parent = g->parent;
-				return connect34(g, p, v, g->left, p->left, v->left, v->right);
-			}
-		}
-	}
+    TreeNode<T, U>* rotate(TreeNode<T, U> *v) {
+        TreeNode<T, U> *p = v->parent, *g = p->parent;
+        // connect 3+4 structure based on relation between g, p, v
+        if (isLChild(p)) { // zig
+            if (isLChild(v)) { // zig-zig
+                p->parent = g->parent;
+                return connect34(v, p, g, v->left, v->right, p->right, g->right);
+            } else { // zig-zag
+                v->parent = g->parent;
+                return connect34(p, v, g, p->left, v->left, v->right, g->right);
+            }
+        } else { // zag
+            if (isLChild(v)) { // zag-zig
+                v->parent = g->parent;
+                return connect34(g, v, p, g->left, v->left, v->right, p->right);
+            } else { // zag-zag
+                p->parent = g->parent;
+                return connect34(g, p, v, g->left, p->left, v->left, v->right);
+            }
+        }
+    }
 
-	TreeNode<T, U>* connect34(TreeNode<T, U> *a, TreeNode<T, U> *b, TreeNode<T, U> *c,
-		TreeNode<T, U> *T0, TreeNode<T, U> *T1, TreeNode<T, U> *T2, TreeNode<T, U> *T3) {
-			a->left = T0; if (T0) T0->parent = a;
-			a->right = T1; if (T1) T1->parent = a; updateHeight(a);
-			c->left = T2; if (T2) T2->parent = c;
-			c->right = T3; if (T3) T3->parent = c; updateHeight(c);
-			b->left = a; a->parent = b;
-			b->right = c; c->parent = b; updateHeight(b);
-			return b;
-	}
+    TreeNode<T, U>* connect34(TreeNode<T, U> *a, TreeNode<T, U> *b, TreeNode<T, U> *c,
+        TreeNode<T, U> *T0, TreeNode<T, U> *T1, TreeNode<T, U> *T2, TreeNode<T, U> *T3) {
+            a->left = T0; if (T0) T0->parent = a;
+            a->right = T1; if (T1) T1->parent = a; updateHeight(a);
+            c->left = T2; if (T2) T2->parent = c;
+            c->right = T3; if (T3) T3->parent = c; updateHeight(c);
+            b->left = a; a->parent = b;
+            b->right = c; c->parent = b; updateHeight(b);
+            return b;
+    }
 
    public:
 
@@ -235,35 +235,35 @@ class AVLTree : public BinarySearchTree<T, U> {
 
     AVLTree() : BinarySearchTree<T, U>() {}
 
-	void insert(T key, U value) {
-		TreeNode<T, U>* &node = search(key);
-		if (node) return;		// key already in tree
-		// height = 0, parent = _hot
-		node = new TreeNode<T, U>(key, value, 0, _hot);
-		// update heights & check balance factors for ancestors
-		for (TreeNode<T, U> *g = _hot; g; g = g->parent) {
-			if (AvlUnbalanced(g)) { // rotate based on g, p, v
-			    TreeNode<T, U>* &parent = fromParentTo(g);
-				parent = rotate(tallerChild(tallerChild(g)));
-				break;
-			} else { // insert node increases heights of ancestors
-				updateHeight(g);
-			}
-		}
-	}
-	void remove(T key) {
-		TreeNode<T, U>* &node = search(key);
-		if (!node) return;		// no such node
-		_remove(node);
-		// update heights & check balance factors for ancestors
-		for (TreeNode<T, U> *g = _hot; g; g = g->parent) {
-			if (AvlUnbalanced(g)) { // rotate & get root of the subtree
-				TreeNode<T, U>* &parent = fromParentTo(g);
-				g = parent = rotate(tallerChild(tallerChild(g)));
-			}
-			updateHeight(g);
-		}
-	}
+    void insert(T key, U value) {
+        TreeNode<T, U>* &node = search(key);
+        if (node) return;		// key already in tree
+        // height = 0, parent = _hot
+        node = new TreeNode<T, U>(key, value, 0, _hot);
+        // update heights & check balance factors for ancestors
+        for (TreeNode<T, U> *g = _hot; g; g = g->parent) {
+            if (AvlUnbalanced(g)) { // rotate based on g, p, v
+                TreeNode<T, U>* &parent = fromParentTo(g);
+                parent = rotate(tallerChild(tallerChild(g)));
+                break;
+            } else { // insert node increases heights of ancestors
+                updateHeight(g);
+            }
+        }
+    }
+    void remove(T key) {
+        TreeNode<T, U>* &node = search(key);
+        if (!node) return;		// no such node
+        _remove(node);
+        // update heights & check balance factors for ancestors
+        for (TreeNode<T, U> *g = _hot; g; g = g->parent) {
+            if (AvlUnbalanced(g)) { // rotate & get root of the subtree
+                TreeNode<T, U>* &parent = fromParentTo(g);
+                g = parent = rotate(tallerChild(tallerChild(g)));
+            }
+            updateHeight(g);
+        }
+    }
 };
 ```
 
@@ -304,97 +304,347 @@ class SplayTree : public BinarySearchTree<T, U> {
     using SearchTree<T, U>::root;
     using BinarySearchTree<T, U>::_hot;
     using BinarySearchTree<T, U>::_remove;
-	using BinarySearchTree<T, U>::_search;
+    using BinarySearchTree<T, U>::_search;
 
-	void attachAsLChild(TreeNode<T, U> *node, TreeNode<T, U> *lc) {
-		node->left = lc; if (lc) lc->parent = node;
-	}
-	void attachAsRChild(TreeNode<T, U> *node, TreeNode<T, U> *rc) {
-		node->right = rc; if (rc) rc->parent = node;
-	}
+    void attachAsLChild(TreeNode<T, U> *node, TreeNode<T, U> *lc) {
+        node->left = lc; if (lc) lc->parent = node;
+    }
+    void attachAsRChild(TreeNode<T, U> *node, TreeNode<T, U> *rc) {
+        node->right = rc; if (rc) rc->parent = node;
+    }
 
-	TreeNode<T, U>* splay(TreeNode<T, U> *v) {
-		// move the node to root
-		if (!v) return nullptr;
-		TreeNode<T, U> *p, *g, *gg;
-		while ((p = v->parent) && (g = p->parent)) {
-			gg = g->parent;		// parent of the subtree
-			if (isLChild(v)) {
-				if (isLChild(p)) { 	// zig-zig
-					attachAsLChild(g, p->right); attachAsLChild(p, v->right);
-					attachAsRChild(p, g); attachAsRChild(v, p);
-				} else { // zig-zag
-					attachAsLChild(p, v->right); attachAsRChild(g, v->left);
-					attachAsLChild(v, g); attachAsRChild(v, p);
-				}
-			} else if (!isLChild(p)) { // zag-zag
-				attachAsRChild(g, p->left); attachAsRChild(p, v->left);
-				attachAsLChild(p, g); attachAsLChild(v, p);
-			} else { // zag-zig
-				attachAsRChild(p, v->left); attachAsLChild(g, v->right);
-				attachAsRChild(v, g); attachAsLChild(v, p);
-			}
-			if (!gg) { // v is root now
-				v->parent = nullptr;
-			} else {
-				(g == gg->left) ? attachAsLChild(gg, v) : attachAsRChild(gg, v);
-			}
-		}
-		if (p = v->parent) { // g is null, need one more zig/zag
-			if (isLChild(v)) { // zig
-				attachAsLChild(p, v->right); attachAsRChild(v, p);
-			} else { // zag
-				attachAsRChild(p, v->left); attachAsLChild(v, p);
-			}
-		}
-		v->parent = nullptr;	// set as root
-		return v;
-	}
+    TreeNode<T, U>* splay(TreeNode<T, U> *v) {
+        // move the node to root
+        if (!v) return nullptr;
+        TreeNode<T, U> *p, *g, *gg;
+        while ((p = v->parent) && (g = p->parent)) {
+            gg = g->parent;		// parent of the subtree
+            if (isLChild(v)) {
+                if (isLChild(p)) { 	// zig-zig
+                    attachAsLChild(g, p->right); attachAsLChild(p, v->right);
+                    attachAsRChild(p, g); attachAsRChild(v, p);
+                } else { // zig-zag
+                    attachAsLChild(p, v->right); attachAsRChild(g, v->left);
+                    attachAsLChild(v, g); attachAsRChild(v, p);
+                }
+            } else if (!isLChild(p)) { // zag-zag
+                attachAsRChild(g, p->left); attachAsRChild(p, v->left);
+                attachAsLChild(p, g); attachAsLChild(v, p);
+            } else { // zag-zig
+                attachAsRChild(p, v->left); attachAsLChild(g, v->right);
+                attachAsRChild(v, g); attachAsLChild(v, p);
+            }
+            if (!gg) { // v is root now
+                v->parent = nullptr;
+            } else {
+                (g == gg->left) ? attachAsLChild(gg, v) : attachAsRChild(gg, v);
+            }
+        }
+        if (p = v->parent) { // g is null, need one more zig/zag
+            if (isLChild(v)) { // zig
+                attachAsLChild(p, v->right); attachAsRChild(v, p);
+            } else { // zag
+                attachAsRChild(p, v->left); attachAsLChild(v, p);
+            }
+        }
+        v->parent = nullptr;	// set as root
+        return v;
+    }
 
    public:
     TreeNode<T, U> *&search(T key) {
         _hot = nullptr;
         TreeNode<T, U> *v = _search(root, key);
-		root = splay((v ? v : _hot));	// set the last visited node as root
-		return root;
+        root = splay((v ? v : _hot));	// set the last visited node as root
+        return root;
     }
 
-	void insert(T key, U value) {
-		if (!root) { root = new TreeNode<T, U>(key, value); return; }
-		TreeNode<T, U>* node = search(key);
-		if (key == node->key) return;		// key already in tree
-		root = new TreeNode<T, U>(key, value);
-		node->parent = root;
-		if (node->key < key) {
-			root->left = node; root->right = node->right;
-			if (node->right) {
-				node->right->parent = root; node->right = nullptr;
-			}
-		} else {
-			root->right = node; root->left = node->left;
-			if (node->left) {
-				node->left->parent = root; node->left = nullptr;
-			}
-		}
-	}
-	void remove(T key) {
-		if (!root || search(key)->key != key) return;	// no such node
-		TreeNode<T, U> *to_delete = root;
-		if (!root->left) { // delete root directly
-			root = root->right;
-			if (root) root->parent = nullptr;
-		} else if (!root->right) {
-			root = root->left;
-			if (root) root->parent = nullptr;
-		} else {
-			root = root->right; root->parent = nullptr;
-			search(key); // search right subtree
-			root->left = to_delete->left; to_delete->left->parent = root;
-		}
-		delete(to_delete);
-	}
+    void insert(T key, U value) {
+        if (!root) { root = new TreeNode<T, U>(key, value); return; }
+        TreeNode<T, U>* node = search(key);
+        if (key == node->key) return;		// key already in tree
+        root = new TreeNode<T, U>(key, value);
+        node->parent = root;
+        if (node->key < key) {
+            root->left = node; root->right = node->right;
+            if (node->right) {
+                node->right->parent = root; node->right = nullptr;
+            }
+        } else {
+            root->right = node; root->left = node->left;
+            if (node->left) {
+                node->left->parent = root; node->left = nullptr;
+            }
+        }
+    }
+    void remove(T key) {
+        if (!root || search(key)->key != key) return;	// no such node
+        TreeNode<T, U> *to_delete = root;
+        if (!root->left) { // delete root directly
+            root = root->right;
+            if (root) root->parent = nullptr;
+        } else if (!root->right) {
+            root = root->left;
+            if (root) root->parent = nullptr;
+        } else {
+            root = root->right; root->parent = nullptr;
+            search(key); // search right subtree
+            root->left = to_delete->left; to_delete->left->parent = root;
+        }
+        delete(to_delete);
+    }
 };
 ```
+
+
+
+## B-树
+
+**B-树（B-tree）**利用了计算机系统中另一个重要概念——分级存储，在存储数据量巨大的前提下，无法将所有数据都放在内存中，因此要尽量减少外存访问次数，以增加内存访问次数折中。为了达到这个目的，B-树，或者更广泛的**多路搜索树（multi-way search tree）**，将节点和它的孩子合并为一个“大节点”：
+
+![multi 1](https://two2er.github.io/img/search_tree/multi1.png)
+
+合并后的“大节点”具有若干个key值，原本单个节点的二叉路径被收拢在一起，形成了多叉节点。如上图右，将节点和它的左右孩子合并，左右孩子的孩子成为大节点的孩子，使得树变成一棵四叉树，称为四路搜索树。一般来说，将`k`层节点合并，可以得到一棵`2^k`路搜索树。多路搜索树相比二叉搜索树的优势是，在读取外存的节点时，能够一次将节点中的key值读入，而非像二叉搜索树每次读入一个key值。由于同一个大节点中的key值在逻辑上与物理上都彼此相邻，所以批量从外存读入所需的时间与读取单个key值得时间几乎一样。每个节点保存的最佳key值数目和不同外存的批量访问特性有关。
+
+所谓**m阶B-树**，即**m路平衡搜索树（m>2)**，它处于最底层的节点输入外部节点，其他节点属于内部节点：
+
+![multi 2](https://two2er.github.io/img/search_tree/multi2.png)
+
+其中，所有外部节点的深度都相等（都在最底层）。同时，每个内部节点都存有不超过`m-1`个key值，以及用于指示对应分支的`min(ceil(m/2), 2) <= x <= m`个引用（即孩子，根节点例外。一般来说key值数为分支数减一）。因此，m阶B-树也称为`(ceil(m/2), m)`-树。一般来说，大数据集会以B-树形式放置于外存中。对于活跃的B-树，其根节点会常驻于内存；此外，任何时刻通常只有另一个节点（称为当前节点）留驻于内存。在搜索时，将需要的节点载入内存，顺序扫描其包含的key值匹配搜索值（由于数量不大，不必使用二分查找），通过分支指示进入孩子节点。m阶B-树的查找、插入、删除操作的时间复杂度都为`O(log_m(N))`。
+
+![multi 3](https://two2er.github.io/img/search_tree/multi3.png)
+
+在代码实现上，由于B-树的节点可以有多个key值，所以不能再用二叉数的节点类了。这里选择用`vector`来装key，value，以及孩子。在插入、删除操作中，由于为节点增加、删除一个key值，可能导致节点的key值数量不合法（数量**上溢（overflow）**或**下溢（underflow）**），需要触发**分裂（split）**和**合并（merge）**的操作来处理。
+
+在插入一个key值后，如果节点的key值数量为`m`，那么会触发分裂操作。具体地说，将其第`floor(m/2)`个（从0开始数）上移到它的父节点中，然后其左边的key值划分为一个节点，右边的key值划分为一个节点；两个节点作为原本父节点的孩子存在。如果分裂的操作导致父节点也发生上溢，会继续分裂父节点。
+
+![multi 4](https://two2er.github.io/img/search_tree/multi4.png)
+
+在删除一个key值时，思路和二叉搜索树的删除很像：找到待删除key值所在节点，将这个key值和它的直接后继（当前节点的孩子中大于这个key值的最小key值）交换，然后将key值删除。这种操作可以保证待删除key值所在节点是一个叶子节点。在删除完key值后，节点的key值数量可能会少于`ceil(m/2)-1`，发生了下溢，需要用合并操作处理。合并修复要分情况处理，假设待删除key值所在节点为`V`：
+
+- `V`存在左兄弟`L`，且至少包含`ceil(m/2)`个key值。那么，假设`L`和`V`是它们父节点`P`的key值`y`的左右孩子，将`y`移动到`V`（放在最左边），再将`L`中最大的key值`x`移动到`y`原本的位置，可以满足B-树条件。
+- `V`的右兄弟`R`存在，且至少包含`ceil(m/2)`个key值。那么，作为上一种情况的镜像对称操作，也可以从`R`中挪用一个key值来顶替。
+- `V`的左右兄弟`L`和`R`或者不存在，或者包含的key值均不足`ceil(m/2)`个。事实上，`L`和`R`不会同时不存在。假设`L`存在，它的key值数量应该刚好为`ceil(m/2)-1`。这时，可以从`P`中借来`y`，将`L`和`V`合并成一个节点。合并后的节点key值数量不大于`m-1`，满足B-树条件。然而，`P`的key值数量会减一，需要递归地对其检查是否下溢；如果下溢，还需对`P`进行合并修复。如果合并传递到了根节点，使其key值数量变为0，这时那个`L V`后的节点就成为了新根节点。
+
+![multi 5](https://two2er.github.io/img/search_tree/multi5.png)
+
+```c++
+template <typename T, typename U>
+struct MultiNode {
+    std::vector<T> keys;
+    std::vector<U> values;
+    int height;
+    MultiNode *parent;
+    std::vector<MultiNode*> children;
+    MultiNode() : parent(nullptr), height(0), children(1, nullptr) {}
+};
+
+template <typename T, typename U>
+class MultiTree {
+   protected:
+    MultiNode<T, U> *root;
+
+   public:
+    MultiTree() : root(nullptr) {}
+
+    ~MultiTree() { _delete(root); }
+    void _delete(MultiNode<T, U> *node) {
+        if (!node) return;
+        for (MultiNode<T, U>* child : node->children)
+            _delete(child);
+        delete node;
+    }
+
+    #define getHeight(node) ((node) ? (node)->height : -1)
+    void updateHeight(MultiNode<T, U> *node) {
+        int max_height = -1, child_height;
+        for (MultiNode<T, U>* child : node->children) {
+            child_height = getHeight(child);
+            if (child_height > max_height) max_height = child_height; 
+        }
+        node->height = 1 + max_height;
+    }
+};
+
+template <typename T, typename U>
+class BTree : public MultiTree<T, U> {
+   protected:
+    using MultiTree<T, U>::root;
+    
+    int order;  // m-order B-Tree
+    MultiNode<T, U> *_hot;
+
+    #define move_range(from,to,start) (to).assign((from).begin()+(start), (from).end()); (from).erase((from).begin()+(start), (from).end());
+
+    void solveOverflow(MultiNode<T, U> *node) {
+        if (node->children.size() <= order) return;
+        // move s-th key to parent node
+        int s = order / 2;
+        T key = node->keys[s];
+        U value = node->values[s];
+        // split to left and right child
+        MultiNode<T, U> *right = new MultiNode<T, U>();
+        move_range(node->keys, right->keys, s + 1); node->keys.pop_back();
+        move_range(node->values, right->values, s + 1); node->values.pop_back();
+        move_range(node->children, right->children, s + 1);
+        int i;
+        for (i = 0; i < right->children.size(); ++i)
+            if (right->children[i]) right->children[i]->parent = right;
+        // insert s-th key to parent
+        MultiNode<T, U> *parent = node->parent;
+        if (!parent) { // new root
+            parent = new MultiNode<T, U>();
+            root = parent;
+            root->children[0] = node;
+        }
+        for (i = 0; i < parent->keys.size(); ++i)
+            if (parent->keys[i] > key) break;
+        parent->keys.insert(parent->keys.begin()+i, key);
+        parent->values.insert(parent->values.begin()+i, value);
+        parent->children.insert(parent->children.begin()+i+1, right);
+        node->parent = parent; right->parent = parent;
+        solveOverflow(parent);
+    }
+
+    void solveUnderflow(MultiNode<T, U> *v) {
+        if ((order + 1) / 2 <= v->children.size()) return;
+        MultiNode<T, U> *p = v->parent;
+        if (!p) { // v is the root
+            if (!v->keys.size() && v->children[0]) {
+                // when merging the two children of root, root has only one key
+                root = v->children[0]; root->parent = nullptr;
+                delete(v);
+            }
+            return;
+        }
+        int i = 0;  // v is the i-th child of p
+        while (p->children[i] != v) ++i;
+        if (0 < i) { // has left siblings
+            MultiNode<T, U> *L = p->children[i-1];
+            if ((order + 1) / 2 < L->children.size()) { // case 1
+                // move y and x
+                v->keys.insert(v->keys.begin(), p->keys[i-1]);
+                v->values.insert(v->values.begin(), p->values[i-1]);
+                p->keys[i-1] = L->keys.back(); p->values[i-1] = L->values.back();
+                L->keys.pop_back(); L->values.pop_back();
+                // and the last child of L
+                v->children.insert(v->children.begin(), L->children.back());
+                L->children.pop_back();
+                if (v->children[0]) v->children[0]->parent = v;
+                return;
+            }
+        } else if (p->children.size() - 1 > i) { // has right siblings
+            MultiNode<T, U> *R = p->children[i+1];
+            if ((order + 1) / 2 < R->children.size()) { // case 2
+                v->keys.insert(v->keys.end(), p->keys[i]);
+                v->values.insert(v->values.end(), p->values[i]);
+                p->keys[i] = R->keys[0]; p->values[i] = R->values[0];
+                R->keys.erase(R->keys.begin()); R->values.erase(R->values.begin());
+                v->children.push_back(R->children[0]);
+                R->children.erase(R->children.begin());
+                if (v->children.back()) v->children.back()->parent = v;
+                return;
+            }
+        }
+        // case 3
+        if (0 < i) { // merge with left sibling
+            MultiNode<T, U> *L = p->children[i-1];
+            // merge them to L. delete v
+            L->keys.push_back(p->keys[i-1]); L->values.push_back(p->values[i-1]);
+            p->keys.erase(p->keys.begin()+i-1); p->values.erase(p->values.begin()+i-1);
+            p->children.erase(p->children.begin() + i);   // delete a branch
+            // move keys and children from v to L
+            L->keys.insert(L->keys.end(), v->keys.begin(), v->keys.end());
+            L->values.insert(L->values.end(), v->values.begin(), v->values.end());
+            L->children.insert(L->children.end(), v->children.begin(), v->children.end());
+            for (MultiNode<T, U> *child : L->children)
+                if (child) child->parent = L;
+            delete(v);
+        } else { // merge with right sibling
+            MultiNode<T, U> *R = p->children[i + 1];
+            R->keys.insert(R->keys.begin(), p->keys[i]);
+            R->values.insert(R->values.begin(), p->values[i]);
+            p->keys.erase(p->keys.begin() + i); p->values.erase(p->values.begin() + i);
+            p->children.erase(p->children.begin() + i);
+            // move keys and children from v to R
+            R->keys.insert(R->keys.begin(), v->keys.begin(), v->keys.end());
+            R->values.insert(R->values.begin(), v->values.begin(), v->values.end());
+            R->children.insert(R->children.begin(), v->children.begin(), v->children.end());
+            for (MultiNode<T, U> *child : R->children)
+                if (child) child->parent = R;
+            delete (v);
+        }
+        solveUnderflow(p);
+    }
+
+   public:
+    BTree(int order = 3) : MultiTree<T, U>(), order(order) {}
+
+    MultiNode<T, U>* search(T key) {
+        MultiNode<T, U> *curr = root;
+        _hot = nullptr;
+        int i;
+        while (curr) {
+            // search key in current node
+            for (i = 0; i < curr->keys.size(); ++i) {
+                if (curr->keys[i] == key) return curr;
+                else if (curr->keys[i] > key) break;
+            }
+            _hot = curr;
+            curr = curr->children[i];   // go to next node
+        }
+        return nullptr; // no such key
+    }
+
+    void insert(T key, U value) {
+        MultiNode<T, U> *node = search(key);
+        if (node) return;   // has existed
+        if (!_hot) root = _hot = new MultiNode<T, U>();
+        int i;
+        for (i = 0; i < _hot->keys.size(); ++i) {
+            if (_hot->keys[i] > key) break;
+        }
+        // insert key at _hot->key[i]
+        _hot->keys.insert(_hot->keys.begin()+i, key);
+        _hot->values.insert(_hot->values.begin()+i, value);
+        // add a new child
+        _hot->children.insert(_hot->children.begin()+i+1, nullptr);
+        solveOverflow(_hot);
+    }
+
+    void remove(T key) {
+        MultiNode<T, U> *node = search(key);
+        if (!node) return;  // no such node
+        // find key in node
+        int i;
+        for (i = 0; i < node->keys.size(); ++i) {
+            if (node->keys[i] == key) break; 
+        }
+        if (node->children[0]) { // internal node
+            MultiNode<T, U> *u = node->children[i+1];   // right subtree
+            while (u->children[0]) u = u->children[0];  // direct succeed
+            node->keys[i] = u->keys[0]; node->values[i] = u->values[0];
+            node = u; i = 0;    // go to the leaf node
+        }
+        // delete a key of leaf node
+        node->keys.erase(node->keys.begin()+i); node->values.erase(node->values.begin()+i);
+        node->children.erase(node->children.begin()+i+1);
+        solveUnderflow(node);
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

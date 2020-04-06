@@ -5,3 +5,4 @@ Thumbs.db
 _drafts
 .ruby-version
 Gemfile.lock
+*.out
