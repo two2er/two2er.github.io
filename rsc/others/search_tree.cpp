@@ -18,6 +18,13 @@ template <typename T, typename U>
 class SearchTree {
    protected:
     TreeNode<T, U> *root;
+
+#define getHeight(node) ((node) ? (node)->height : -1)
+    void updateHeight(TreeNode<T, U> *node) {
+        int Lheight = getHeight(node->left), Rheight = getHeight(node->right);
+        node->height = 1 + (Lheight > Rheight ? Lheight : Rheight);
+    }
+
    public:
 
     SearchTree() : root(nullptr) {}
@@ -29,12 +36,6 @@ class SearchTree {
         if (!node) return;
         _delete(node->left), _delete(node->right);
         delete node;
-    }
-
-    #define getHeight(node) ( (node) ? (node)->height : -1 )
-    void updateHeight(TreeNode<T, U> *node) {
-        int Lheight = getHeight(node->left), Rheight = getHeight(node->right);
-        node->height = 1 + (Lheight > Rheight ? Lheight : Rheight);
     }
 
     void inorder() {

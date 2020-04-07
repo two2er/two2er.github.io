@@ -17,6 +17,16 @@ class MultiTree {
    protected:
     MultiNode<T, U> *root;
 
+#define getHeight(node) ((node) ? (node)->height : -1)
+    void updateHeight(MultiNode<T, U> *node) {
+        int max_height = -1, child_height;
+        for (MultiNode<T, U> *child : node->children) {
+            child_height = getHeight(child);
+            if (child_height > max_height) max_height = child_height;
+        }
+        node->height = 1 + max_height;
+    }
+
    public:
     MultiTree() : root(nullptr) {}
 
@@ -26,16 +36,6 @@ class MultiTree {
         for (MultiNode<T, U>* child : node->children)
             _delete(child);
         delete node;
-    }
-
-    #define getHeight(node) ((node) ? (node)->height : -1)
-    void updateHeight(MultiNode<T, U> *node) {
-        int max_height = -1, child_height;
-        for (MultiNode<T, U>* child : node->children) {
-            child_height = getHeight(child);
-            if (child_height > max_height) max_height = child_height; 
-        }
-        node->height = 1 + max_height;
     }
 };
 
@@ -220,6 +220,8 @@ void test_btree() {
             if (value == 7) flag = false;
         }
         if (flag) printf("error!");
+        auto r2 = bt.search(each);
+        if (r2) printf("no remove");
     }
     printf("finished");
 }
