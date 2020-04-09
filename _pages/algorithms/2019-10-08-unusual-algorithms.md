@@ -391,32 +391,35 @@ def inorderTraversal(self, node: TreeNode) -> List[int]:
 
 ```python
 def postorderTraversal(self, node: TreeNode) -> List[int]:
-	stack = []
-	last = None         # last popped node
-	while node or stack:
-	    # if node, traverse the subtree whose root is node / postorder(node)
-	    # if not node, go to stack.pop()
-	    while node:
-	        # go to the left most node, and store parent nodes
-	        stack.append(node)
-	        node = node.left
-	    # now node is the left most node, or the last parent node
-	    node = stack[-1]
-	    # whether its right child has been visited
-	    # pop all nodes whose right subtree has been traversed
-	    while not node.right or node.right == last:
-	        # the right child has been visited
-	        self.visit(node)
-	        last = stack.pop()
-	        if stack:
-	            # go to the last unvisited node
-	            node = stack[-1]
-	        else:
-	            # all nodes has been visited
-	            return
-	    else:
-	        # go to the right subtree
-	        node = node.right
+    if not node:
+        return []
+    self.rtn = []
+    
+    stack = []
+    last = None         # last popped node
+    while node or stack:
+        # if node, traverse the subtree whose root is node / postorder(node)
+        # if not node, go to stack.pop()
+        while node:
+            # go to the left most node, and store parent nodes
+            stack.append(node)
+            node = node.left
+        # now node is the left most node, or the last parent node
+        node = stack[-1]
+        # whether its right child has been visited
+        # pop all nodes whose right subtree has been traversed
+        while not node.right or node.right == last:
+            # the right child has been visited
+            self.visit(node)
+            last = stack.pop()
+            if stack:
+                # go to the last unvisited node
+                node = stack[-1]
+            else:
+                # all nodes has been visited
+                return self.rtn
+        # go to the right subtree
+        node = node.right
 ```
 
 
