@@ -422,6 +422,21 @@ def postorderTraversal(self, node: TreeNode) -> List[int]:
         node = node.right
 ```
 
+后序遍历的另一种方法，是对前序遍历进行改造。使用类似前序遍历的节点->右节点->左节点的顺序遍历树，得到的遍历序列是后序遍历的翻转。
+
+```python
+def postorderTraversal(self, root: TreeNode):
+    stack = [root]
+    while stack:
+        # traverse the subtree whose root is node / preorder(node)
+        node = stack.pop()
+        while node:
+            if node.left:
+                stack.append(node.left)
+            visit(node)
+            node = node.right
+```
+
 
 
 

@@ -55,6 +55,31 @@ def heap_sort(arr):
         heapify(arr, i, 0)
 ```
 
+```c++
+void heapify(vector<int> &arr, int begin, int end) {
+    int tmp;
+    while (begin < end) {
+        int left = begin * 2 + 1, right = begin * 2 + 2;
+        int max = begin;
+        if (left < end && arr[left] > arr[max]) max = left;
+        if (right < end && arr[right] > arr[max]) max = right;
+        if (max != begin) tmp = arr[max], arr[max] = arr[begin], arr[begin] = tmp, begin = max;
+        else break;
+    }
+}
+
+void heapSort(vector<int> &arr) {
+    int tmp;
+    for (int i = arr.size() / 2 - 1; i >= 0; --i) {
+        heapify(arr, i, arr.size());
+    }
+    for (int i = arr.size() - 1; i > 0; --i) {
+        tmp = arr[0], arr[0] = arr[i], arr[i] = tmp;
+        heapify(arr, 0, i);
+    }
+}
+```
+
 
 
 ## Trie树
