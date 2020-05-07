@@ -122,25 +122,24 @@ def computeLPSArray(p, M, lps):
 
 
 
-Floyd-Warshall算法
+## Floyd-Warshall 算法
 
-**Floyd-Warshall算法**是一个动态规划的求最短路径的算法。和Dijkstra算法不同，它能求出所有顶点到所有顶点的最短距离，时间复杂度是`O(|V|^3)`，如果要用Dijkstra实现求所有顶点到所有顶点的最短路径，时间复杂度是`O(|E||V|^2)`（其中`|V|`是节点数，`|E|`是边数）。FW算法用`dist(i, j, k)`来表示，从节点`i`到节点`j`，经过编号为`1~k`的中间节点，能达到的最短路径长度。在已知所有`dist(·, ·, k-1)`的情况下，我们知道，节点`i`到`j`途径`1~k`号中间节点的最短路径有两种可能：
+FW算法是一个动态规划的求最短路径的算法。和Dijkstra不同，它能求出所有顶点到所有顶点的最短距离，时间复杂度是$O(|V|^3)$，如果要用Dijkstra实现求所有顶点到所有顶点的最短路径，时间复杂度是$O(|V|^2|E|)$。FW算法用$dist(i, j, k)$来表示，从节点`i`到节点`j`，经过编号为`1-k`的中间节点，能达到的最短路径长度。在已知所有$dist(\cdot, \cdot, k-1)$的情况下，我们知道，节点`i`到`j`的最短路径有两种可能：
 
-- 经过`k`，那么`dist(i, j, k) = dist(i, k, k-1) + dist(k, j, k-1)`。这是因为这条最短路径上，只有`1~k`号点，而点`k`只会经过一次（没有负权重边，所以路径上的边都只会经过一次）
-- 不经过`k`，那么`dist(i, j, k) = dist(i, j, k-1)`
+ - 经过`k`，那么$dist(i, j, k) = dist(i, k, k-1) + dist(k, j, k-1)$。这是因为这条最短路径上，只有`1-k`号点，而点`k`只会经过一次（没有负权重边）
+ - 不经过`k`，那么$dist(i, j, k) = dist(i, j, k-1)$
 
-一开始，`dist(i, j, 0)`在`i`到`j`之间有边的情况下设为边权重，否则设为无穷大。然后逐步迭代：
+一开始，$dist(i, j, 0)$在`i`到`j`之间有边的情况下设为边权重，否则设为无穷大。然后逐步迭代：
 
 ```python
-def floyd_warshall(V, E):
-    N = len(V)
-    dist = [[[float('inf') for _ in range(N+1)] for _ in range(N+1)] for _ in range(N+1)]
-    for edge in E:
-        dist[edge.start][edge.end][0] = edge.weight
-    for k in range(1, N+1):
-        for i in range(1, N+1):
-            for j in range(1, N+1):
-                dist[i][j][k] = min(dist[i][j][k-1], dist[i][k][k-1] + dist[k][j][k-1])
+N = len(V)
+dist = [[[float('inf') for _ in range(N+1)] for _ in range(N+1)] for _ in range(N+1)]
+for edge in E:
+    dist[edge.start][edge.end][0] = edge.weight
+for k in range(1, N+1):
+    for i in range(1, N+1):
+        for j in range(1, N+1):
+            dist[i][j][k] = min(dist[i][j][k-1], dist[i][k][k-1] + dist[k][j][k-1])
 ```
 
 
@@ -531,8 +530,6 @@ f[i][v]=max{f[i-1][v-k*c[i]]+k*w[i]|0<=k<=n[i]}
 ```
 
 完全背包问题和多重背包问题都有一种共同的做法——将复杂的完全背包和多重背包转换成01背包问题。多于第`i`件物品，至多可以取`n[i]`件，那么就用`n[i]`件相同的物品代替。最终变成总共`sum(n[1..N])`件物品的背包问题，时间复杂度从`O(VN)`变成`O(V\sum n[i])`。事实上，每个`n[i]`可以表示为至多`k`个数的和，这`k`个数为`arr_k = [1 2 4 ... 2^(k-1) n[i]-2^k+1]`。`k`是满足`n[i]-2^k+1>0`的最大整数。将`n[i]`件物品转化成`k`件物品，其中第`x`件的重量为`c[i] * arr_k[x]`，价值为`w[i] * arr_k[x]`。注意到这`k`件物品能组合出的所有重量、价值，和`n[i]`件原物品可以组合出的重量、价值是一样的。在这`k`件物品中挑选和原来的`n[i]`件物品中挑选没什么不同。这里使用的是二进制的思想，
-
-
 
 
 
