@@ -436,6 +436,24 @@ def postorderTraversal(self, root: TreeNode):
             node = node.right
 ```
 
+### 用队列做层序遍历
+
+```c++
+void levelTraversal(TreeNode *node) {
+    queue<TreeNode*> q;
+    q.push(node);
+    while (!q.empty()) {
+        int size = q.size();
+        while (size--) {
+            visit(q.front());
+            if (q.front()->left) q.push(q.front()->left);
+            if (q.front()->right) q.push(q.front()->right);
+            q.pop();
+        }
+    }
+}
+```
+
 
 
 
