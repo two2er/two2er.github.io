@@ -21,11 +21,17 @@ comments: true
 
 我把LeetCode上的问题按Tags刷了一下，并把一些认为有意义的题目的解答记录在这里，主要目的是为了提(zhao)高(dao)算(gong)法(zuo)。因为提(zhao)高(dao)算(gong)法(zuo)很难，所以这篇博客可能会不断更新。使用中文是为了多写点。感谢收看。（2019.09.15）
 
+#### 按主题分类
+
 - [递归](/pages/LeetCode/2019-09-15-recursion)
 - [动态规划](/pages/LeetCode/2019-09-15-DP)
 - [贪心算法](/pages/LeetCode/2019-09-17-greedy)
 - [链表](/pages/LeetCode/2019-11-16-linkedlist)
+
+#### 按列表分类
+
 - [Top 100 Liked Questions](/pages/LeetCode/2019-12-05-LCTop100)
+- [字节跳动高频题](https://two2er.github.io/pages/LeetCode/2020-05-14-ByteDance)
 - to be continued...
 
 ---
