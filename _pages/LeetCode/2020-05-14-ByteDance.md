@@ -1,14 +1,12 @@
 ---
 layout: post
-title: LeetCode-字节跳动高频题
-excerpt: "LeetCode问题的解答：字节跳动高频题"
+title: LeetCode-公司算法高频题
+excerpt: "LeetCode问题的解答：公司算法高频题"
 categories: [Algorithm]
 comments: true
 ---
 
 
-
-![bytedance1](https://two2er.github.io/img/frequent_leetcode/bytedance1.png)
 
 ## 440. K-th Smallest in Lexicographical Order
 
@@ -329,11 +327,148 @@ public:
 
 
 
+## 887. Super Egg Drop
 
+> You are given `K` eggs, and you have access to a building with `N` floors from `1` to `N`. 
+>
+> Each egg is identical in function, and if an egg breaks, you cannot drop it again.
+>
+> You know that there exists a floor `F` with `0 <= F <= N` such that any egg dropped at a floor higher than `F` will break, and any egg dropped at or below floor `F` will not break.
+>
+> Each *move*, you may take an egg (if you have an unbroken one) and drop it from any floor `X` (with `1 <= X <= N`). 
+>
+> Your goal is to know **with certainty** what the value of `F` is.
+>
+> What is the minimum number of moves that you need to know with certainty what `F` is, regardless of the initial value of `F`?
+>
+> **Example 1:**
+>
+> ```
+> Input: K = 1, N = 2
+> Output: 2
+> Explanation: 
+> Drop the egg from floor 1.  If it breaks, we know with certainty that F = 0.
+> Otherwise, drop the egg from floor 2.  If it breaks, we know with certainty that F = 1.
+> If it didn't break, then we know with certainty F = 2.
+> Hence, we needed 2 moves in the worst case to know what F is with certainty.
+> ```
+>
+> **Example 2:**
+>
+> ```
+> Input: K = 2, N = 6
+> Output: 3
+> ```
+>
+> **Example 3:**
+>
+> ```
+> Input: K = 3, N = 14
+> Output: 4
+> ```
 
+这道题可以用动态规划解决。令`dp[k][n]`为使用`k`个鸡蛋，从`n`层楼中找出`F`的最小移动数。假设在这`n`层楼中，我们选择楼层`1 <= x <= n`开始扔鸡蛋。如果鸡蛋破碎，说明`F < x`，`[x, n]`这些楼层可以排除。接下来的任务是利用`k-1`个鸡蛋，从`x-1`层楼中找出`F`，所需最小步数为`dp[k-1][x-1]`。如果鸡蛋没有碎，说明`F >= x`。接下来的任务是利用`k`个鸡蛋去`[x+1, n]`这些楼层尝试（第`x`层不再需要尝试。如果在第`x+1`层扔鸡蛋时破碎，说明`F = x`），所需最小步数为`dp[k][n-x]`。因此，在`x`层丢鸡蛋，所需的移动数为`max(1 + dp[k-1][x-1], 1 + dp[k][n-x])`。（至于为什么是`max`，我的想法是，题目要求保证能找到`F`的前提下的最小移动数。这是在求最低上限。求下限没有意义，因为运气好的话，我在`N`层楼中，随便挑一层楼`x`，在`x`和`x+1`各扔一次鸡蛋，一个碎一个没碎，就可以判断出`F = x`了。此时移动数的下限为2，它并没有实际的意义，因为移动2步不能保证对于任意初始值的`F`，都能找得出来。我们需要保证对任意初始值的`F`，都可以找出来，就要求移动数的上限。）由于`dp[k-1][x-1]`和`dp[k][n-x]`在求`dp[k][n]`前便已经计算过，所以我们可以确定在第`x`层扔鸡蛋，需要多少步才能确保找出`F`。我们考察`1 <= x <= n`的所有`x`，找出那个最小的步数，即是`dp[k][n]`的值。
 
+$$dp[k][n] = 1 + \min_{1\leq x\leq n} \max(dp[k-1][x-1], dp[k][n-x])$$
 
+初始时，`dp[k][1] = 1`，因为楼层只有一层楼，扔一次就可以；`dp[1][n] = n`，因为必须从1楼扔起，扔2楼扔3楼……最坏情况是一直扔到`n`楼。另外为了计算方便，设`dp[k][0] = 0`。完成初始化后，按下面的代码更新`dp`数组：
 
+```c++
+class Solution {
+public:
+    int superEggDrop(int K, int N) {
+        vector<vector<int>> dp(K+1, vector<int>(N+1));
+        for (int k = 0; k <= K; ++k) dp[k][0] = 0, dp[k][1] = 1;
+        for (int n = 1; n <= N; ++n) dp[1][n] = n;
+        
+        for (int k = 2; k <= K; ++k) {
+            for (int n = 2; n <= N; ++n) {
+                dp[k][n] = 0x7fffffff;
+                for (int x = 1; x <= n; ++x) {
+                    dp[k][n] = min(dp[k][n], 1 + max(dp[k-1][x-1], dp[k][n-x]));
+                }
+            }
+        }
+        return dp[K][N];
+    }
+};
+```
+
+这个算法的时间复杂度为`O(KN^2)`，非常高，提交`LeetCode`以后会超时。因此，需要对时间复杂度进行一些优化。事实上，由于`dp[k][n]`是随着`n`递增而递增的，所以在最内层循环中，`dp[k-1][x-1]`会随着`x`递增而递增，`dp[k][n-x]`会随着`x`递增而递减。想象一下，一开始时`x = 1`，应该是`dp[k-1][x-1] <= dp[k][n-x]`，它们的最大值是`dp[k][n-x]`。随着`x`递增，这两个函数会相遇，之后最大值变成了`dp[k-1][x-1]`。显然，这两个函数越靠近时，它们的最大值就越小。因此，最大值应该是呈下降->上升趋势。要找最大值的最小值，可以用二分查找。内层循环的复杂度变为`O(lgN)`，算法整体的复杂度也下降到了`O(KNlgN)`。
+
+```c++
+int lo = 1, hi = n;
+while (lo + 1 < hi) {
+    x = (lo + hi) / 2;
+    if (dp[k-1, x-1] < dp[k, n-x]) lo = x;	// 交点在左边
+    else if (dp[k-1, x-1] > dp[k, n-x]) hi = x;	// 交点在右边
+    else lo = hi = x;  // 发现了交点
+}
+// 这个官方提供的二分查找保留了两个候选项lo和hi
+// 事实上因为dp[k-1, x-1]和dp[k, n-x]是离散的，可能没有交点，所以二分查找要在lo = hi - 1
+// 且dp[k-1, lo-1] < dp[k, n-lo] && dp[k-1, hi-1] > dp[k, n-hi]处停下。lo和hi正好在交点两边
+ans = 1 + min(max(dp[k-1, lo-1], dp[k, n-lo]), max(dp[k-1, hi-1], dp[k, n-hi]));
+```
+
+上面的状态转移方程意图是让我们寻找点
+
+$$x_{opt} = \arg\min_{1\leq x\leq n} \max(dp[k-1][x-1], dp[k][n-x])$$
+
+当`n`增加时，`dp[k-1][x-1]`不变，`dp[k][n-x]`增加。由于我们是寻找这两个函数的交点。我们可以把`T1 = dp[k-1][x-1]`想象成是一条斜率为正的线，`T2 = dp[k][n-x]`是一条斜率为负的线。`n`增加，`T2`抬高。这时交点会向右移。因此，在第二层循环`for (int n = 2; n <= N; ++n)`中，如果已经算得`n`的$x_{opt}$，那么要计算`n+1`的`x_{opt}`时，只需从`n`的$x_{opt}$开始计算。上述算法可以改进成下面，时间复杂度进一步减少到`O(KN)`：
+
+![bytedance2](https://two2er.github.io/img/frequent_leetcode/bytedance2.png)
+
+```c++
+class Solution {
+public:
+    int superEggDrop(int K, int N) {
+        vector<vector<int>> dp(K+1, vector<int>(N+1));
+        for (int k = 0; k <= K; ++k) dp[k][0] = 0, dp[k][1] = 1;
+        for (int n = 1; n <= N; ++n) dp[1][n] = n;
+        
+        for (int k = 2; k <= K; ++k) {
+            int x = 1;
+            for (int n = 2; n <= N; ++n) {
+                // max(dp[k-1][x-1], dp[k][n-x]还在呈下降趋势
+                while (x < n && max(dp[k-1][x-1], dp[k][n-x]) > max(dp[k-1][x], dp[k][n-x-1])) 
+                    ++x;
+                dp[k][n] = 1 + max(dp[k-1][x-1], dp[k][n-x]);
+            }
+        }
+        return dp[K][N];
+    }
+};
+```
+
+另外，在空间复杂度上也可以进行优化。二维数组`dp`可以用两个一维数组代替，一个记录`dp[k-1]`一个记录`dp[k]`。
+
+在官方回答中，还提到了一种理论上时间复杂度更小的办法。这种方法也是动态规划，不过它求的是：给定`T`次移动和`K`个鸡蛋，最多能检测的楼层数`N = f(T, K)`。对于一个`T`，如果`f(T, K)`不小于题目给的`N`，那么说明可以用`T`步来找出题目中所说的`F`。因此，我们就把题目转化成：求满足`f(T, K) >= N`的最小的`T`。
+
+`f(T, K)`的转移方程比较难想。假设有一栋楼高`M`，至少用`T`次移动和`K`个鸡蛋才能测出它的`F`。那么`f(T, K) = M`。我们在这栋楼的某一层扔鸡蛋，假如它碎了，我们就排除当前楼层上面的楼层，专注于下面的楼层。下面的楼层的高度`Md`显然是等于`f(T-1, K-1)`，因为测出下面楼层的`F`，是测出整栋楼`F`的一个环节。反之，如果鸡蛋没碎，那么当前楼层下面楼层就被排除，我们专注于上面的楼层。上面楼层的高度显然是`f(T-1, K)`，原理和前面的情况一样。因此，整栋楼的高度`f(T, K) = f(T-1, K-1) + f(T-1, K) + 1`。
+
+边界条件为：当`T >= 1`的时候，`f(T, 1) = T`，当`K >= 1`的时候，`f(1, K) = 1`。显然，`T <= N`。我们只需计算`f(1, 1)`到`f(N, K)`的所有值，找出其中不小于`N`的最小的`T`即可。由于找到了`T`程序就会返回，所以理论上的时间复杂度是小于`O(KN)`的。（官方结论是$O(K*\sqrt[K]{N})$。
+
+```c++
+class Solution {
+public:
+    int superEggDrop(int K, int N) {
+        if (N == 1) return 1;
+        vector<vector<int>> f(N + 1, vector<int>(K + 1));
+        for (int i = 1; i <= K; ++i) f[1][i] = 1;
+        
+        int ans = -1;
+        for (int i = 2; i <= N; ++i) {
+            for (int j = 1; j <= K; ++j)
+                f[i][j] = 1 + f[i - 1][j - 1] + f[i - 1][j];
+            if (f[i][K] >= N) {
+                ans = i;
+                break;
+            }
+        }
+        return ans;
+    }
+};
+```
 
 
 
