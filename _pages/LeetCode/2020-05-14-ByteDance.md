@@ -472,5 +472,289 @@ public:
 
 
 
+## 89. Gray Code
+
+> The gray code is a binary numeral system where two successive values differ in only one bit.
+>
+> Given a non-negative integer *n* representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.
+>
+> **Example 1:**
+>
+> ```
+> Input: 2
+> Output: [0,1,3,2]
+> Explanation:
+> 00 - 0
+> 01 - 1
+> 11 - 3
+> 10 - 2
+> 
+> For a given n, a gray code sequence may not be uniquely defined.
+> For example, [0,2,3,1] is also a valid gray code sequence.
+> 
+> 00 - 0
+> 10 - 2
+> 11 - 3
+> 01 - 1
+> ```
+>
+> **Example 2:**
+>
+> ```
+> Input: 0
+> Output: [0]
+> Explanation: We define the gray code sequence to begin with 0.
+>              A gray code sequence of n has size = 2n, which for n = 0 the size is 20 = 1.
+>              Therefore, for n = 0 the gray code sequence is [0].
+> ```
+
+显然，`n`位格雷码的数量是`n-1`位格雷码的数量的两倍。在求出`n-1`位格雷码以后，在第`n`位加一个1，就能转变成`n`位格雷码。由于相邻两个格雷码的汉明距离为1，所以可以把`n-1`位格雷码序列颠倒，然后在第`n`位加一个1，再和原序列拼接。这样拼接后的序列，相邻两个格雷码的汉明距离仍然是1。
+
+```c++
+class Solution {
+public:
+    vector<int> grayCode(int n) {
+        if (n == 0) return {0};
+        vector<int> codes = grayCode(n-1), copy = codes;
+        reverse(copy.begin(), copy.end());
+        int n_bit = 1 << (n - 1);
+        for (int &i : copy) i += n_bit;
+        codes.insert(codes.end(), copy.begin(), copy.end());
+        return codes;
+    }
+};
+```
+
+
+
+## 54. Spiral Matrix
+
+> Given a matrix of *m* x *n* elements (*m* rows, *n* columns), return all elements of the matrix in spiral order.
+>
+> **Example 1:**
+>
+> ```
+> Input:
+> [
+>  [ 1, 2, 3 ],
+>  [ 4, 5, 6 ],
+>  [ 7, 8, 9 ]
+> ]
+> Output: [1,2,3,6,9,8,7,4,5]
+> ```
+>
+> **Example 2:**
+>
+> ```
+> Input:
+> [
+>   [1, 2, 3, 4],
+>   [5, 6, 7, 8],
+>   [9,10,11,12]
+> ]
+> Output: [1,2,3,4,8,12,11,10,9,5,6,7]
+> ```
+
+这题不难，关键是要写得优雅。这个[答案](https://leetcode-cn.com/problems/spiral-matrix/solution/cxiang-xi-ti-jie-by-youlookdeliciousc-3/)写得就挺好：
+
+```c++
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector <int> ans;
+        if(matrix.empty()) return ans; //若数组为空，直接返回答案
+        int u = 0; //赋值上下左右边界
+        int d = matrix.size() - 1;
+        int l = 0;
+        int r = matrix[0].size() - 1;
+        while(true) {
+            for(int i = l; i <= r; ++i) ans.push_back(matrix[u][i]); //向右移动直到最右
+            if(++ u > d) break; //重新设定上边界，若上边界大于下边界，则遍历遍历完成，下同
+            for(int i = u; i <= d; ++i) ans.push_back(matrix[i][r]); //向下
+            if(-- r < l) break; //重新设定有边界
+            for(int i = r; i >= l; --i) ans.push_back(matrix[d][i]); //向左
+            if(-- d < u) break; //重新设定下边界
+            for(int i = d; i >= u; --i) ans.push_back(matrix[i][l]); //向上
+            if(++ l > r) break; //重新设定左边界
+        }
+        return ans;
+    }
+};
+```
+
+
+
+## 43. Multiply Strings
+
+> Given two non-negative integers `num1` and `num2` represented as strings, return the product of `num1` and `num2`, also represented as a string.
+>
+> **Example 1:**
+>
+> ```
+> Input: num1 = "2", num2 = "3"
+> Output: "6"
+> ```
+>
+> **Example 2:**
+>
+> ```
+> Input: num1 = "123", num2 = "456"
+> Output: "56088"
+> ```
+
+`num1`的第`x`位（从低位数起，最低位是第0位）和`num2`的第`y`位相乘，相乘结果乘以`10^(x+y)`加在最后的乘积中。两个数相乘，结果最多是`num1.length() + num2.length()`位。因此，可以用一个长度为`num1.length() + num2.length()`的数组暂时保存每位的相乘结果，最后再将数组转变成字符串。
+
+
+
+![img](https://pic.leetcode-cn.com/171cad48cd0c14f565f2a0e5aa5ccb130e4562906ee10a84289f12e4460fe164-image.png)
+
+```c++
+class Solution {
+public:
+    string multiply(string num1, string num2) {
+        if (num1 == "0" || num2 == "0") return "0";
+        int l1 = num1.length(), l2 = num2.length(), n1, n2;
+        vector<int> rtn(l1 + l2, 0);
+        for (int i = l1 - 1; i >= 0; --i) {
+            n1 = num1[i] - '0';
+            for (int j = l2 - 1; j >= 0; --j) {
+                n2 = num2[j] - '0';
+                // num1[i]是num1的第l1-i-1位，num2[j]是num2的第l2-j-1位，因此在rtn中是第l1+l2-i-j-2位。
+                // rtn第0位下标是l1+l2-1，因此第l1+l2-i-j位下标是(l1+l2-1)-(l1+l2-i-j-2) = i+j+1。
+                n2 = n1 * n2 + rtn[i + j + 1];
+                rtn[i + j + 1] = n2 % 10, rtn[i + j] += n2 / 10; // 进位
+            }
+        }
+        string srtn = "";
+        for (int i = 0; i < rtn.size(); ++i) {
+            if (i == 0 && rtn[i] == 0) continue; // 跳过首部0
+            srtn += rtn[i] + '0';
+        }
+        return srtn;
+    }
+};
+```
+
+
+
+## 913. Cat and Mouse
+
+> A game on an **undirected** graph is played by two players, Mouse and Cat, who alternate turns.
+>
+> The graph is given as follows: `graph[a]` is a list of all nodes `b` such that `ab` is an edge of the graph.
+>
+> Mouse starts at node 1 and goes first, Cat starts at node 2 and goes second, and there is a Hole at node 0.
+>
+> During each player's turn, they **must** travel along one edge of the graph that meets where they are. For example, if the Mouse is at node `1`, it **must** travel to any node in `graph[1]`.
+>
+> Additionally, it is not allowed for the Cat to travel to the Hole (node 0.)
+>
+> Then, the game can end in 3 ways:
+>
+> - If ever the Cat occupies the same node as the Mouse, the Cat wins.
+> - If ever the Mouse reaches the Hole, the Mouse wins.
+> - If ever a position is repeated (ie. the players are in the same position as a previous turn, and it is the same player's turn to move), the game is a draw.
+>
+> Given a `graph`, and assuming both players play optimally, return `1` if the game is won by Mouse, `2` if the game is won by Cat, and `0` if the game is a draw.
+>
+> **Example 1:**
+>
+> ```
+> Input: [[2,5],[3],[0,4,5],[1,4,5],[2,3],[0,2,3]]
+> Output: 0
+> Explanation:
+> 4---3---1
+> |   |
+> 2---5
+>  \ /
+>   0
+> ```
+
+这道题官方的回答是用极大极小算法（不是很懂），我看了另一篇[答案](https://leetcode-cn.com/problems/cat-and-mouse/solution/c-si-lu-pou-xi-3-dpjie-jue-bo-yi-ce-lue-zui-jia-zh/)，用的是通俗易懂的动态规划。令`dp[t][x][y]`表示走`t`步以后（猫和老鼠一起算，`t % 2 == 0`表示现在轮到老鼠走，`t % 2 == 1`表示现在轮到猫走），老鼠处于节点`x`，猫处于节点`y`的胜负情况。0表示平局，1表示老鼠胜利，2表示猫胜利，-1表示未知。以下这些情况，猫和老鼠的胜负情况是确定的：
+
+- `dp[*][0][*]`，即老鼠走入洞中，老鼠胜利，值为1
+- `dp[*][y][y]`，即猫和老鼠在同个位置，猫胜利，值为2
+- `dp[2n][*][*]`，其中`n`为节点数，即猫和老鼠都走遍了所有节点，平局，值为0。这里用`t <= 2n`为中止条件，而非题目所说的不可进入以前走过的节点，可以简化问题。
+
+根据下一轮的胜负情况，我们可以回推当轮的胜负情况。
+
+- 如果`t % 2 == 0`，当轮老鼠行动，下一轮猫行动。递归地探索所有老鼠能到达的节点`nx in graph[x]`：
+
+	- 如果有某个`nx`使得`dp[t+1][nx][y] == 1`，那么当前轮中，老鼠只要走入`nx`节点，它就获胜了，所以`dp[t][x][y] = 1`，表示老鼠当前轮稳赢。
+	- 如果对于所有`nx`都有`dp[t+1][nx][y] == 2`，说明当前轮中，无论老鼠走到哪里，它都输定了，所以`dp[t][x][y] = 2`，表示老鼠当前轮稳输。
+	- 其他情况下，有些`nx`使得`dp[t+1][nx][y] == 0`，有些（也许没有）`nx`使得`dp[t+1][nx][y] == 2`。老鼠肯定不会那么傻，走去`dp[t+1][nx][y] == 2`的那些`nx`节点。它会走到平局的那些节点去，所以`dp[t][x][y] = 0`。
+
+- 同理，如果`t % 2 == 1`，当轮猫行动，下一轮老鼠行动。我们也有类似的结论：
+
+	- 对于一个`ny in graph[y]`，如果它等于0，我们应该跳过它，因为猫不能进入0节点。
+
+	- 如果有某个`ny`使得`dp[t+1][ny][y] == 2`，那么当前轮中，猫只要走入`ny`节点，它就获胜了，所以`dp[t][x][y] = 2`，表示猫当前轮稳赢。
+	- 如果对于所有`ny`都有`dp[t+1][ny][y] == 1`，说明当前轮中，无论猫走到哪里，它都输定了，所以`dp[t][x][y] = 1`，表示猫当前轮稳输。
+	- 其他情况下，有些`ny`使得`dp[t+1][ny][y] == 0`，有些（也许没有）`ny`使得`dp[t+1][ny][y] == 1`。猫肯定不会那么傻，走去`dp[t+1][ny][y] == 1`的那些`ny`节点。它会走到平局的那些节点去，所以`dp[t][x][y] = 0`。
+
+根据这些状态转移式子，可以从顶向下地搜索游戏每一步的胜负状态。最后，只要返回`dp[0][1][2]`（开始时的胜负）就可以了。
+
+```c++
+class Solution {
+    int recursive(vector<vector<vector<int>>> &dp, vector<vector<int>> &graph, int t, int x, int y, int n) {
+        if (t >= 2 * n) return 0;
+        if (x == y) return 2;
+        if (x == 0) return 1;
+        if (dp[t][x][y] != -1) return dp[t][x][y];
+
+        int next;
+        if (t % 2 == 0) {
+            bool catWin = true;
+            for (int nx : graph[x]) {
+                if ((next = recursive(dp, graph, t + 1, nx, y, n)) == 1)
+                    return dp[t][x][y] = 1;     // set dp[t][x][y] = 1 and return
+                if (next == 0)
+                    catWin = false;
+            }
+            if (catWin) return dp[t][x][y] = 2;     // all dp[t+1][nx][y] == 2, mouse loses
+            else return dp[t][x][y] = 0;
+        } else {
+            bool mouseWin = true;
+            for (int ny : graph[y]) {
+                if (ny == 0) continue;  // cat cannot go to 0
+                if ((next = recursive(dp, graph, t + 1, x, ny, n)) == 2)
+                    return dp[t][x][y] = 2;
+                if (next == 0)
+                    mouseWin = false;
+            }
+            if (mouseWin) return dp[t][x][y] = 1;
+            else return dp[t][x][y] = 0;
+        }
+        return -1;      // cannot reach here
+    }
+public:
+    int catMouseGame(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<vector<vector<int>>> dp(2 * n, vector<vector<int>>(n, vector<int>(n, -1)));
+        return recursive(dp, graph, 0, 1, 2, n);
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

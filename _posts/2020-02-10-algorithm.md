@@ -31,7 +31,7 @@ comments: true
 #### 按列表分类
 
 - [Top 100 Liked Questions](/pages/LeetCode/2019-12-05-LCTop100)
-- [字节跳动高频题](https://two2er.github.io/pages/LeetCode/2020-05-14-ByteDance)
+- [大厂高频题](https://two2er.github.io/pages/LeetCode/2020-05-14-ByteDance)
 - to be continued...
 
 ---
