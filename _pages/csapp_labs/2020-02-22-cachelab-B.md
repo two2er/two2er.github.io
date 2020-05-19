@@ -4,16 +4,13 @@ title: Cache Lab Part B 解析
 excerpt: "CSAPP实验中的一个。减少矩阵转置运算中的miss/eviction数"
 categories: [CS]
 comments: true
-
-
-
 ---
 
 
 
 ## 介绍
 
-Cache Lab 的Part A较为简单，基本就是对书中描述算法的复现而已，所以不做解析。Part B: Optimizing Matrix Transpose 则比较复杂，需要较多的思考，所以我想把对它的理解记录下来，免得以后忘记了。简单地说，Part B 要求我们转置一个给定的矩阵`A`，将结果保存在另一矩阵`B`中。必须要cache miss少于一定值才能通过该实验。测试脚本使用的cache simulator参数为`s = 5, E = 1, b = 5`，即直接映射，有`2^5 = 32`个set，每个set 1行，block大小为`2^32 = 32`字节。在三个测试用例中，矩阵`A`和`B`的形状分别是`32*32`, `64*64`, `61*67`。在运行`test-trans`启动测试后，会生成一个valgrind trace文件`trace.f0`。该文件大概长这样：
+Part B: Optimizing Matrix Transpose 则比较复杂，需要较多的思考，所以我想把对它的理解记录下来，免得以后忘记了。简单地说，Part B 要求我们转置一个给定的矩阵`A`，将结果保存在另一矩阵`B`中。必须要cache miss少于一定值才能通过该实验。测试脚本使用的cache simulator参数为`s = 5, E = 1, b = 5`，即直接映射，有`2^5 = 32`个set，每个set 1行，block大小为`2^32 = 32`字节。在三个测试用例中，矩阵`A`和`B`的形状分别是`32*32`, `64*64`, `61*67`。在运行`test-trans`启动测试后，会生成一个valgrind trace文件`trace.f0`。该文件大概长这样：
 
 ```
 S 0038b08c,1
