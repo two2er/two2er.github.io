@@ -19,7 +19,7 @@ void mm_check() {
     printf("------------- list -----------------\n");
     for (int i = 0; i < NUM_LISTS; ++i) {
         if (GET(heap_listp + i * WSIZE) != NULL) {
-            printf("list %d {%d ~ %d}:", i, (4<<i), (8<<i));
+            printf("list %d [%d ~ %d]:", i, (4<<i), (8<<i));
             unsigned int *ptr = GET(heap_listp + i * WSIZE);
             int count = 0;      // maximum nodes. avoid infinite loop
             while (ptr != NULL && count++ < 10) {   // traverse list
