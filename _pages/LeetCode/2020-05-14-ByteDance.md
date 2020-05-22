@@ -738,46 +738,48 @@ public:
 
 
 
-## 1236. 网络爬虫
+## [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
 
-> 给定一个链接 startUrl 和一个接口 HtmlParser ，请你实现一个网络爬虫，以实现爬取同 startUrl 拥有相同 域名标签 的全部链接。该爬虫得到的全部链接可以 任何顺序 返回结果。
+> 给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
 >
-> 你的网络爬虫应当按照如下模式工作：
+> 示例:
 >
-> - 自链接 startUrl 开始爬取
-> - 调用 HtmlParser.getUrls(url) 来获得链接url页面中的全部链接
-> - 同一个链接最多只爬取一次
-> - 只输出 域名 与 startUrl 相同 的链接集合
->
-> 如上所示的一个链接，其域名为 example.org。简单起见，你可以假设所有的链接都采用 http协议 并没有指定 端口。例如，链接 http://leetcode.com/problems 和 http://leetcode.com/contest 是同一个域名下的，而链接http://example.org/test 和 http://example.com/abc 是不在同一域名下的。
+> 输入: [-2,1,-3,4,-1,2,1,-5,4],
+> 输出: 6
+> 解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
 
-这是一道简单的图搜索问题，使用DFS或者BFS就好了。下面是BFS的解法：
+这题是非常基础的动态规划题，大一新生就会做。这里主要是想说一种叫线段树的做法。设`get_sums(l, r)`为`nums[l:r+1]`中的四个求和：以`nums[l]`为左端点的最大子数组和`lsum`，以`nums[r]`为右端点的最大子数组和`rsum`，`nums[l:r+1]`中的最大子数组和`msum`，以及`nums[l:r+1]`所有元素的和`esum`。这道题要求的是`get_sums(l, r).msum`。我们可以分治地求不同`l r`的这四个求和。如果`l == r`，那么显然这四个求和都是`nums[l]`。如果`l < r`，我们可以令`mid = (l + r) >> 1`，将其分为两部分：`nums[l:mid+1]`和`nums[mid:r+1]`。递归地求出这两部分的四个求和`left`和`right`。那么，
+
+- `lsum = max(left.lsum, left.esum + right.lsum)`。如果`lsum`对应子数组只在`left`部分中，那么它就是`left.lsum`；如果它跨越了`left`来到了`right`，那么它就是`left.esum + right.lsum`。
+- `rsum = max(right.rsum, right.esum + left.rsum)`。原理和`lsum`相同。
+- `esum = left.esum + right.esum`，毫无疑问。
+- `msum = max(max(left.msum, right.msum), left.rsum + right.lsum)`。如果`msum`对应子数组只存在于`left`中，那么它就是`left.msum`；如果只存在于右数组中，那么它就是`right.msum`。如果它跨越了`left`和`right`，那么它应该是`left.rsum + right.lsum`。
 
 ```c++
 class Solution {
-    string get_domain(string Url) {
-        auto position = Url.find("/", 7);
-        if (position == string::npos) position = Url.length();
-        return Url.substr(7, position - 7);
+    struct sums {
+        int lsum, rsum, msum, esum;
+    };
+    sums get_sums(vector<int>& nums, int l, int r) {
+        if (l == r) return { nums[l], nums[l], nums[l], nums[l] };
+        int mid = (l + r) >> 1;
+        sums left = get_sums(nums, l, mid), right = get_sums(nums, mid + 1, r);
+        int lsum = max(left.lsum, left.esum + right.lsum),
+            rsum = max(right.rsum, right.esum + left.rsum),
+            esum = left.esum + right.esum,
+            msum = max(max(left.msum, right.msum), left.rsum + right.lsum);
+        return { lsum, rsum, msum, esum };
     }
 public:
-    vector<string> crawl(string startUrl, HtmlParser htmlParser) {
-        unordered_set<string> visited;
-        string domain = get_domain(startUrl);
-        queue<string> q;
-        q.push(startUrl);
-        while (!q.empty()) {
-            string url = q.front();
-            q.pop();
-            if (visited.find(url) != visited.end() || get_domain(url) != domain) continue;
-            visited.insert(url);
-            vector<string> nexts = htmlParser.getUrls(url);
-            for (string &next : nexts) q.push(next);
-        }
-        return vector<string>(visited.begin(), visited.end());
+    int maxSubArray(vector<int>& nums) {
+        return get_sums(nums, 0, nums.size() - 1).msum;
     }
 };
 ```
+
+
+
+
 
 
 
